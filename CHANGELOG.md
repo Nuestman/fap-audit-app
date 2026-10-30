@@ -3,6 +3,15 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [0.3.1] — 2026-10-30
+
+### Changed
+- Settings **Auditors** and **FAP staff** use a compact table list; add/edit opens a modal instead of inline forms.
+- Build plan and README brought up to date with people directories, Neon branch setup, and Drizzle migrations.
+
+### Fixed
+- Ensured `0002_people_fields` is recorded in Drizzle’s migration journal on both Neon **main** and **dev** (schema already matched).
+
 ## [0.3.0] — 2026-10-30
 
 ### Added
@@ -42,6 +51,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version 
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[0.3.1]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Nuestman/fap-audit-app/releases/tag/v0.1.0

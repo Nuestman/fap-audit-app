@@ -12,14 +12,7 @@ import {
 } from "@/lib/audit/queries";
 import { formatDate } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
-import { createAuditor, createFapStaff, saveAuditor, saveFapStaff } from "./actions";
-import {
-  AuditorCard,
-  FapStaffCard,
-  NewAuditorForm,
-  NewFapStaffForm,
-  StaffModelPicker,
-} from "./people-editors";
+import { AuditorsDirectory, FapStaffDirectory, StaffModelPicker } from "./people-editors";
 import { NewSiteForm, SiteRow } from "./site-editors";
 
 function Section({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
@@ -88,67 +81,41 @@ export default async function SettingsPage() {
         title="Auditors"
         hint="Used for lead auditor, audit team, and action owners. Inactive names are hidden from new picks."
       >
-        <div className="space-y-3">
-          {auditors.length === 0 ? (
-            <p className="text-sm text-slate-500">None yet. Add the first auditor below.</p>
-          ) : (
-            auditors.map((p) => (
-              <AuditorCard
-                key={p.id}
-                id={p.id}
-                save={saveAuditor}
-                initial={{
-                  name: p.name,
-                  organization: p.organization,
-                  jobTitle: p.jobTitle,
-                  email: p.email,
-                  phone: p.phone,
-                  employeeNumber: p.employeeNumber,
-                  active: p.active,
-                }}
-              />
-            ))
-          )}
-        </div>
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <NewAuditorForm create={createAuditor} />
-        </div>
+        <AuditorsDirectory
+          rows={auditors.map((p) => ({
+            id: p.id,
+            name: p.name,
+            organization: p.organization,
+            jobTitle: p.jobTitle,
+            email: p.email,
+            phone: p.phone,
+            employeeNumber: p.employeeNumber,
+            active: p.active,
+          }))}
+        />
       </Section>
 
       <Section
         title="FAP staff"
         hint="Nurse-in-charge / ambulance driver and action owners. Assign a FAP when using the site-assigned model."
       >
-        <div className="space-y-3">
-          {staff.length === 0 ? (
-            <p className="text-sm text-slate-500">None yet. Add the first staff member below.</p>
-          ) : (
-            staff.map((p) => (
-              <FapStaffCard
-                key={p.id}
-                id={p.id}
-                sites={siteOpts}
-                save={saveFapStaff}
-                initial={{
-                  name: p.name,
-                  organization: p.organization,
-                  jobTitle: p.jobTitle,
-                  email: p.email,
-                  phone: p.phone,
-                  employeeNumber: p.employeeNumber,
-                  qualification: p.qualification,
-                  pinStatus: p.pinStatus,
-                  pinExpiresOn: p.pinExpiresOn,
-                  siteId: p.siteId,
-                  active: p.active,
-                }}
-              />
-            ))
-          )}
-        </div>
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <NewFapStaffForm create={createFapStaff} sites={siteOpts} />
-        </div>
+        <FapStaffDirectory
+          sites={siteOpts}
+          rows={staff.map((p) => ({
+            id: p.id,
+            name: p.name,
+            organization: p.organization,
+            jobTitle: p.jobTitle,
+            email: p.email,
+            phone: p.phone,
+            employeeNumber: p.employeeNumber,
+            qualification: p.qualification,
+            pinStatus: p.pinStatus,
+            pinExpiresOn: p.pinExpiresOn,
+            siteId: p.siteId,
+            active: p.active,
+          }))}
+        />
       </Section>
 
       <Section

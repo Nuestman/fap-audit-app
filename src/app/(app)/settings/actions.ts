@@ -99,6 +99,7 @@ export async function saveAuditor(id: number, input: z.infer<typeof AuditorInput
       active: d.active,
     })
     .where(eq(schema.auditor.id, z.number().int().positive().parse(id)));
+  refresh();
 }
 
 export async function createAuditor(
@@ -151,6 +152,7 @@ export async function saveFapStaff(id: number, input: z.infer<typeof FapStaffInp
       active: d.active,
     })
     .where(eq(schema.fapStaff.id, z.number().int().positive().parse(id)));
+  refresh();
 }
 
 export async function createFapStaff(
