@@ -3,6 +3,8 @@
 import type { ActionStatus } from "@/db/schema";
 import { Field, Input, Select, Textarea } from "@/components/ui";
 import { actionStatusLabel } from "@/lib/audit/classification";
+import type { PersonOption } from "./person-option";
+import { PersonPicker } from "./person-picker";
 
 export type ActionState = {
   action: string | null;
@@ -18,10 +20,12 @@ const STATUSES: ActionStatus[] = ["open", "in_progress", "closed"];
 export function ActionFields({
   value,
   onChange,
+  people,
   label = "Corrective action",
 }: {
   value: ActionState;
   onChange: (value: ActionState) => void;
+  people: PersonOption[];
   label?: string;
 }) {
   return (
@@ -34,9 +38,11 @@ export function ActionFields({
         />
       </Field>
       <Field label="Owner" className="sm:col-span-2">
-        <Input
-          value={value.owner ?? ""}
-          onChange={(e) => onChange({ ...value, owner: e.target.value })}
+        <PersonPicker
+          mode="single"
+          people={people}
+          value={value.owner}
+          onChange={(owner) => onChange({ ...value, owner })}
         />
       </Field>
       <Field label="Target date" className="sm:col-span-2">

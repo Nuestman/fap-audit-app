@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, ProgressBar } from "@/components/ui";
-import { getAudit, getAuditSummaries, getProtocol } from "@/lib/audit/queries";
+import { listActiveAuditors, getAudit, getAuditSummaries, getProtocol } from "@/lib/audit/queries";
 import { formatPercent } from "@/lib/utils";
 import { AuditDetailsForm } from "./audit-details-form";
 
@@ -11,7 +11,10 @@ export default async function AuditOverviewPage({ params }: PageProps<"/audits/[
   const audit = await getAudit(Number(auditId));
   if (!audit) notFound();
   const protocol = await getProtocol(audit.protocolVersionId);
-  const summaries = await getAuditSummaries(audit, protocol);
+  const [auditors, summaries] = await Promise.all([
+    listActiveAuditors(),
+    getAuditSummaries(audit, protocol),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -68,6 +71,7 @@ export default async function AuditOverviewPage({ params }: PageProps<"/audits/[
 
       <AuditDetailsForm
         auditId={audit.id}
+        auditors={auditors}
         initial={{
           title: audit.title,
           period: audit.period,

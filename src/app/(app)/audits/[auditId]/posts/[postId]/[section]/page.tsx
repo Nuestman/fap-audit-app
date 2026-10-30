@@ -6,6 +6,7 @@ import { ConclusionForm, PriorityList, SignOffEditor } from "@/components/audit/
 import type { CriterionData } from "@/components/audit/criterion-card";
 import { ExtraFindingsEditor, type ExtraFindingData } from "@/components/audit/extra-findings-editor";
 import { GoodPracticesEditor } from "@/components/audit/good-practices-editor";
+import { asOwnerPeople, filterStaffForSite } from "@/components/audit/person-option";
 import { PostDetailsForm } from "@/components/audit/post-details-form";
 import { SectionChecklist } from "@/components/audit/section-checklist";
 import { SupplementaryTable } from "@/components/audit/supplementary-table";
@@ -13,7 +14,15 @@ import { NavTabs } from "@/components/nav-tabs";
 import { ButtonLink, Card } from "@/components/ui";
 import { compareCodes, RISKS, riskLabel, riskTone, severityRank } from "@/lib/audit/classification";
 import { classificationCounts, riskCounts } from "@/lib/audit/metrics";
-import { getAudit, getPostWorkspace, getProtocol, type PostWorkspace } from "@/lib/audit/queries";
+import {
+  getAppConfig,
+  getAudit,
+  getPostWorkspace,
+  getProtocol,
+  listActiveAuditors,
+  listActiveFapStaff,
+  type PostWorkspace,
+} from "@/lib/audit/queries";
 import { cn } from "@/lib/utils";
 
 type Props = PageProps<"/audits/[auditId]/posts/[postId]/[section]">;
@@ -27,11 +36,16 @@ export default async function PostSectionPage({ params }: Props) {
   const post = audit?.posts.find((p) => p.id === Number(postId));
   if (!audit || !post) notFound();
 
-  const [protocol, ws] = await Promise.all([
+  const [protocol, ws, auditors, staff, config] = await Promise.all([
     getProtocol(audit.protocolVersionId),
     getPostWorkspace(post.id),
+    listActiveAuditors(),
+    listActiveFapStaff(),
+    getAppConfig(),
   ]);
   if (!ws) notFound();
+  const staffForPost = filterStaffForSite(staff, post.siteId, config.fapStaffModel);
+  const owners = asOwnerPeople(auditors, staffForPost);
 
   const keys = ["details", ...protocol.sections.map((s) => s.code.toLowerCase()), "h", "i"];
   if (!keys.includes(section)) notFound();
@@ -62,6 +76,7 @@ export default async function PostSectionPage({ params }: Props) {
       <div className="space-y-4">
         <PostDetailsForm
           auditPostId={post.id}
+          staff={staffForPost}
           initial={{
             auditDate: post.auditDate,
             shift: post.shift,
@@ -126,7 +141,7 @@ export default async function PostSectionPage({ params }: Props) {
           </h2>
           {sec.subtitle ? <p className="text-sm text-slate-500">{sec.subtitle}</p> : null}
         </div>
-        <SectionChecklist auditPostId={post.id} criteria={criteria} />
+        <SectionChecklist auditPostId={post.id} criteria={criteria} people={owners} />
         {sec.tables.map((t) => (
           <SupplementaryTable
             key={t.id}
@@ -166,7 +181,7 @@ export default async function PostSectionPage({ params }: Props) {
             <h2 className="text-lg font-semibold text-slate-900">H1. Findings not covered by a checklist item</h2>
             <p className="text-sm text-slate-500">Opportunities for improvement or non-conformities with no matching criterion.</p>
           </div>
-          <ExtraFindingsEditor auditPostId={post.id} kind="h1" initial={extras("h1")} />
+          <ExtraFindingsEditor auditPostId={post.id} kind="h1" initial={extras("h1")} people={owners} />
         </section>
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-900">H2. Good practices deserving recognition</h2>
@@ -186,7 +201,7 @@ export default async function PostSectionPage({ params }: Props) {
             <h2 className="text-lg font-semibold text-slate-900">H3. Other issues requiring resolution</h2>
             <p className="text-sm text-slate-500">Facilities, staff welfare, fire safety and similar issues.</p>
           </div>
-          <ExtraFindingsEditor auditPostId={post.id} kind="h3" initial={extras("h3")} />
+          <ExtraFindingsEditor auditPostId={post.id} kind="h3" initial={extras("h3")} people={owners} />
         </section>
       </div>
     );

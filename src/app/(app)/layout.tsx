@@ -2,6 +2,7 @@ import { ClipboardCheck, ListTodo, LogOut, Settings, ShieldPlus } from "lucide-r
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { requireUser } from "@/lib/auth/session";
+import { APP_VERSION } from "@/lib/version";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <footer className="no-print border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500">
+          <span>FAP Audit v{APP_VERSION}</span>
+          <Link href="/changelog" className="hover:text-slate-800 hover:underline">
+            Changelog
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

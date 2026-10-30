@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { PersonOption } from "@/components/audit/person-option";
+import { PersonPicker } from "@/components/audit/person-picker";
 import { SaveIndicator } from "@/components/audit/save-indicator";
 import { Card, Field, Input, Select } from "@/components/ui";
 import type { AuditStatus } from "@/db/schema";
@@ -24,7 +26,15 @@ const STATUS_LABEL: Record<AuditStatus, string> = {
   final: "Final",
 };
 
-export function AuditDetailsForm({ auditId, initial }: { auditId: number; initial: Details }) {
+export function AuditDetailsForm({
+  auditId,
+  initial,
+  auditors,
+}: {
+  auditId: number;
+  initial: Details;
+  auditors: PersonOption[];
+}) {
   const router = useRouter();
   const [v, setV] = useState(initial);
   const { status, schedule } = useAutosave(async (d: Details) => {
@@ -76,10 +86,20 @@ export function AuditDetailsForm({ auditId, initial }: { auditId: number; initia
           />
         </Field>
         <Field label="Lead auditor">
-          <Input value={v.leadAuditor ?? ""} onChange={(e) => set({ leadAuditor: e.target.value })} />
+          <PersonPicker
+            mode="single"
+            people={auditors}
+            value={v.leadAuditor}
+            onChange={(leadAuditor) => set({ leadAuditor })}
+          />
         </Field>
-        <Field label="Auditors" className="sm:col-span-2 lg:col-span-3">
-          <Input value={v.auditors ?? ""} onChange={(e) => set({ auditors: e.target.value })} />
+        <Field label="Audit team" className="sm:col-span-2 lg:col-span-3">
+          <PersonPicker
+            mode="multi"
+            people={auditors}
+            value={v.auditors}
+            onChange={(auditorsValue) => set({ auditors: auditorsValue })}
+          />
         </Field>
       </div>
     </Card>

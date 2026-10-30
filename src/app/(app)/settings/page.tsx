@@ -1,9 +1,25 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Badge, Card, PageHeader } from "@/components/ui";
 import { allowedEmails } from "@/lib/auth/allow-list";
 import { requireUser } from "@/lib/auth/session";
-import { listProtocolVersions, listSites } from "@/lib/audit/queries";
+import {
+  getAppConfig,
+  listAuditors,
+  listFapStaff,
+  listProtocolVersions,
+  listSites,
+} from "@/lib/audit/queries";
 import { formatDate } from "@/lib/utils";
+import { APP_VERSION } from "@/lib/version";
+import { createAuditor, createFapStaff, saveAuditor, saveFapStaff } from "./actions";
+import {
+  AuditorCard,
+  FapStaffCard,
+  NewAuditorForm,
+  NewFapStaffForm,
+  StaffModelPicker,
+} from "./people-editors";
 import { NewSiteForm, SiteRow } from "./site-editors";
 
 function Section({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
@@ -17,8 +33,16 @@ function Section({ title, hint, children }: { title: string; hint?: ReactNode; c
 }
 
 export default async function SettingsPage() {
-  const [user, sites, versions] = await Promise.all([requireUser(), listSites(), listProtocolVersions()]);
+  const [user, sites, auditors, staff, versions, config] = await Promise.all([
+    requireUser(),
+    listSites(),
+    listAuditors(),
+    listFapStaff(),
+    listProtocolVersions(),
+    getAppConfig(),
+  ]);
   const allowed = allowedEmails();
+  const siteOpts = sites.map((s) => ({ id: s.id, code: s.code, name: s.name }));
 
   return (
     <div className="space-y-6">
@@ -50,6 +74,80 @@ export default async function SettingsPage() {
         </div>
         <div className="mt-4 border-t border-slate-100 pt-4">
           <NewSiteForm />
+        </div>
+      </Section>
+
+      <Section
+        title="FAP staff model"
+        hint="Controls whether staff are offered globally or only at their assigned post."
+      >
+        <StaffModelPicker initial={config.fapStaffModel} />
+      </Section>
+
+      <Section
+        title="Auditors"
+        hint="Used for lead auditor, audit team, and action owners. Inactive names are hidden from new picks."
+      >
+        <div className="space-y-3">
+          {auditors.length === 0 ? (
+            <p className="text-sm text-slate-500">None yet. Add the first auditor below.</p>
+          ) : (
+            auditors.map((p) => (
+              <AuditorCard
+                key={p.id}
+                id={p.id}
+                save={saveAuditor}
+                initial={{
+                  name: p.name,
+                  organization: p.organization,
+                  jobTitle: p.jobTitle,
+                  email: p.email,
+                  phone: p.phone,
+                  employeeNumber: p.employeeNumber,
+                  active: p.active,
+                }}
+              />
+            ))
+          )}
+        </div>
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <NewAuditorForm create={createAuditor} />
+        </div>
+      </Section>
+
+      <Section
+        title="FAP staff"
+        hint="Nurse-in-charge / ambulance driver and action owners. Assign a FAP when using the site-assigned model."
+      >
+        <div className="space-y-3">
+          {staff.length === 0 ? (
+            <p className="text-sm text-slate-500">None yet. Add the first staff member below.</p>
+          ) : (
+            staff.map((p) => (
+              <FapStaffCard
+                key={p.id}
+                id={p.id}
+                sites={siteOpts}
+                save={saveFapStaff}
+                initial={{
+                  name: p.name,
+                  organization: p.organization,
+                  jobTitle: p.jobTitle,
+                  email: p.email,
+                  phone: p.phone,
+                  employeeNumber: p.employeeNumber,
+                  qualification: p.qualification,
+                  pinStatus: p.pinStatus,
+                  pinExpiresOn: p.pinExpiresOn,
+                  siteId: p.siteId,
+                  active: p.active,
+                }}
+              />
+            ))
+          )}
+        </div>
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <NewFapStaffForm create={createFapStaff} sites={siteOpts} />
         </div>
       </Section>
 
@@ -92,6 +190,17 @@ export default async function SettingsPage() {
           </p>
         )}
         <p className="mt-3 text-xs text-slate-500">Signed in as {user.email}.</p>
+      </Section>
+
+      <Section title="About" hint="Release version for this deployment.">
+        <p className="text-sm text-slate-700">
+          FAP Audit <span className="font-mono font-medium">v{APP_VERSION}</span>
+        </p>
+        <p className="mt-2 text-sm">
+          <Link href="/changelog" className="text-slate-900 underline">
+            View changelog
+          </Link>
+        </p>
       </Section>
     </div>
   );

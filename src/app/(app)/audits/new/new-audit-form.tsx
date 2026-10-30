@@ -1,21 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import type { PersonOption } from "@/components/audit/person-option";
+import { PersonPicker } from "@/components/audit/person-picker";
 import { Button, Card, Field, Input, Select } from "@/components/ui";
 import { createAuditAction } from "./actions";
 
 type Props = {
   sites: { id: number; code: string; name: string; active: boolean }[];
   versions: { id: number; name: string; version: string; isActive: boolean }[];
+  auditors: PersonOption[];
   defaultLead: string;
 };
 
-export function NewAuditForm({ sites, versions, defaultLead }: Props) {
+export function NewAuditForm({ sites, versions, auditors, defaultLead }: Props) {
   const [state, action, pending] = useActionState(createAuditAction, null);
+  const [leadAuditor, setLeadAuditor] = useState<string | null>(defaultLead || null);
+  const [team, setTeam] = useState<string | null>(null);
 
   return (
     <Card className="max-w-2xl p-5">
       <form action={action} className="space-y-4">
+        <input type="hidden" name="leadAuditor" value={leadAuditor ?? ""} />
+        <input type="hidden" name="auditors" value={team ?? ""} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Audit title" className="sm:col-span-2">
             <Input name="title" required placeholder="e.g. Q1 2027 FAP Audit" />
@@ -27,10 +34,10 @@ export function NewAuditForm({ sites, versions, defaultLead }: Props) {
             <Input name="startDate" type="date" />
           </Field>
           <Field label="Lead auditor">
-            <Input name="leadAuditor" defaultValue={defaultLead} />
+            <PersonPicker mode="single" people={auditors} value={leadAuditor} onChange={setLeadAuditor} />
           </Field>
-          <Field label="Auditors">
-            <Input name="auditors" placeholder="Names, comma-separated" />
+          <Field label="Audit team" className="sm:col-span-2">
+            <PersonPicker mode="multi" people={auditors} value={team} onChange={setTeam} />
           </Field>
           <Field label="Protocol version" className="sm:col-span-2">
             <Select name="protocolVersionId" defaultValue={versions.find((v) => v.isActive)?.id}>

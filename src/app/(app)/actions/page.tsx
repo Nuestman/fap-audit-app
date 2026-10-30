@@ -1,7 +1,13 @@
+import { asOwnerPeople } from "@/components/audit/person-option";
 import { Button, ButtonLink, EmptyState, Field, PageHeader, Select } from "@/components/ui";
 import type { ActionStatus } from "@/db/schema";
 import { actionStatusLabel, compareCodes, severityRank } from "@/lib/audit/classification";
-import { listActions, type TrackedAction } from "@/lib/audit/queries";
+import {
+  listActions,
+  listActiveAuditors,
+  listActiveFapStaff,
+  type TrackedAction,
+} from "@/lib/audit/queries";
 import { todayIso } from "@/lib/utils";
 import { ActionRow } from "./action-row";
 
@@ -21,7 +27,12 @@ export default async function ActionsPage({ searchParams }: PageProps<"/actions"
     overdue: one(q.overdue) === "1",
   };
   const today = todayIso();
-  const all = await listActions();
+  const [all, auditors, staff] = await Promise.all([
+    listActions(),
+    listActiveAuditors(),
+    listActiveFapStaff(),
+  ]);
+  const people = asOwnerPeople(auditors, staff);
 
   const sites = [...new Set(all.map((a) => a.siteCode))].sort();
   const owners = [...new Set(all.map((a) => a.owner?.trim()).filter((o): o is string => !!o))].sort();
@@ -105,7 +116,7 @@ export default async function ActionsPage({ searchParams }: PageProps<"/actions"
       ) : (
         <div className="space-y-3">
           {shown.map((a) => (
-            <ActionRow key={a.id} action={a} overdue={isOverdue(a, today)} />
+            <ActionRow key={a.id} action={a} overdue={isOverdue(a, today)} people={people} />
           ))}
         </div>
       )}

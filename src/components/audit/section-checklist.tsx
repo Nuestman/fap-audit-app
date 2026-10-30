@@ -6,6 +6,7 @@ import type { Answer, Classification } from "@/db/schema";
 import { NON_CONFORMITIES } from "@/lib/audit/classification";
 import { cn } from "@/lib/utils";
 import { CriterionCard, type CriterionData } from "./criterion-card";
+import type { PersonOption } from "./person-option";
 
 type Filter = "all" | "unanswered" | "findings";
 
@@ -18,9 +19,11 @@ const FILTERS: { key: Filter; label: string }[] = [
 export function SectionChecklist({
   auditPostId,
   criteria,
+  people,
 }: {
   auditPostId: number;
   criteria: CriterionData[];
+  people: PersonOption[];
 }) {
   const [states, setStates] = useState(
     () =>
@@ -89,6 +92,7 @@ export function SectionChecklist({
             key={c.itemId}
             auditPostId={auditPostId}
             data={c}
+            people={people}
             onAnswerChange={onAnswerChange}
           />
         ))

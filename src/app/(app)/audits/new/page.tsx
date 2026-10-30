@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui";
 import { requireUser } from "@/lib/auth/session";
-import { listProtocolVersions, listSites } from "@/lib/audit/queries";
+import { listActiveAuditors, listProtocolVersions, listSites } from "@/lib/audit/queries";
 import { NewAuditForm } from "./new-audit-form";
 
 export default async function NewAuditPage() {
-  const [user, sites, versions] = await Promise.all([
+  const [user, sites, versions, auditors] = await Promise.all([
     requireUser(),
     listSites(),
     listProtocolVersions(),
+    listActiveAuditors(),
   ]);
 
   return (
@@ -26,6 +27,7 @@ export default async function NewAuditPage() {
           version: v.version,
           isActive: v.isActive,
         }))}
+        auditors={auditors}
         defaultLead={user.name}
       />
     </>

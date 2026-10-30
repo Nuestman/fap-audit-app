@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ActionFields } from "@/components/audit/action-fields";
 import { ClassificationBadge, RiskBadge } from "@/components/audit/badges";
+import type { PersonOption } from "@/components/audit/person-option";
 import { SaveIndicator } from "@/components/audit/save-indicator";
 import { Badge, Card, Field, Textarea } from "@/components/ui";
 import type { TrackedActionInput } from "@/lib/audit/action-mutations";
@@ -12,7 +13,15 @@ import { useAutosave } from "@/lib/hooks/use-autosave";
 import { cn, formatDate } from "@/lib/utils";
 import { saveTrackedAction } from "./actions";
 
-export function ActionRow({ action, overdue }: { action: TrackedAction; overdue: boolean }) {
+export function ActionRow({
+  action,
+  overdue,
+  people,
+}: {
+  action: TrackedAction;
+  overdue: boolean;
+  people: PersonOption[];
+}) {
   const [state, setState] = useState<TrackedActionInput>({
     action: action.action,
     owner: action.owner,
@@ -47,6 +56,7 @@ export function ActionRow({ action, overdue }: { action: TrackedAction; overdue:
       </div>
       {action.finding ? <p className="text-sm text-slate-700">{action.finding}</p> : null}
       <ActionFields
+        people={people}
         value={state}
         onChange={(v) => update({ ...state, ...v }, v.status !== state.status)}
       />

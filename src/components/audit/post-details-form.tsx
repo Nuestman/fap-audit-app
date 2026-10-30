@@ -4,6 +4,8 @@ import { useState } from "react";
 import { savePostDetails } from "@/app/(app)/audits/[auditId]/posts/[postId]/actions";
 import { Card, Field, Input, Select } from "@/components/ui";
 import { useAutosave } from "@/lib/hooks/use-autosave";
+import type { PersonOption } from "./person-option";
+import { PersonPicker } from "./person-picker";
 import { SaveIndicator } from "./save-indicator";
 
 type Details = {
@@ -15,7 +17,15 @@ type Details = {
 
 const SHIFTS = ["Day", "Night", "24-hour", "Other"];
 
-export function PostDetailsForm({ auditPostId, initial }: { auditPostId: number; initial: Details }) {
+export function PostDetailsForm({
+  auditPostId,
+  initial,
+  staff,
+}: {
+  auditPostId: number;
+  initial: Details;
+  staff: PersonOption[];
+}) {
   const [v, setV] = useState(initial);
   const { status, schedule } = useAutosave((d: Details) => savePostDetails(auditPostId, d));
 
@@ -48,9 +58,11 @@ export function PostDetailsForm({ auditPostId, initial }: { auditPostId: number;
           </Select>
         </Field>
         <Field label="Nurse-in-charge / ambulance driver">
-          <Input
-            value={v.nurseInCharge ?? ""}
-            onChange={(e) => set({ nurseInCharge: e.target.value })}
+          <PersonPicker
+            mode="single"
+            people={staff}
+            value={v.nurseInCharge}
+            onChange={(nurseInCharge) => set({ nurseInCharge })}
           />
         </Field>
         <Field label="Ambulance(s) audited" hint="(unit numbers)">

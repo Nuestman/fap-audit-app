@@ -36,6 +36,8 @@ export const overallStatusEnum = pgEnum("overall_status", [
   "satisfactory_with_improvements",
   "unsatisfactory",
 ]);
+export const pinStatusEnum = pgEnum("pin_status", ["active", "expired", "unknown"]);
+export const fapStaffModelEnum = pgEnum("fap_staff_model", ["global", "site_assigned"]);
 
 const updatedAt = () =>
   timestamp("updated_at", { withTimezone: true })
@@ -120,6 +122,43 @@ export const site = pgTable("site", {
   name: text("name").notNull(),
   location: text("location"),
   active: boolean("active").notNull().default(true),
+});
+
+/** Directory of auditors — used for lead/team and action owners. Names are snapshotted as text elsewhere. */
+export const auditor = pgTable("auditor", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  organization: text("organization"),
+  jobTitle: text("job_title"),
+  email: text("email"),
+  phone: text("phone"),
+  employeeNumber: text("employee_number"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** FAP staff directory — nurse-in-charge and action owners. Optional site assignment for site_assigned model. */
+export const fapStaff = pgTable("fap_staff", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  organization: text("organization"),
+  jobTitle: text("job_title"),
+  email: text("email"),
+  phone: text("phone"),
+  employeeNumber: text("employee_number"),
+  qualification: text("qualification"),
+  pinStatus: pinStatusEnum("pin_status").notNull().default("unknown"),
+  pinExpiresOn: date("pin_expires_on"),
+  siteId: integer("site_id").references(() => site.id, { onDelete: "set null" }),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Singleton app settings (always id = 1). */
+export const appConfig = pgTable("app_config", {
+  id: integer("id").primaryKey().default(1),
+  fapStaffModel: fapStaffModelEnum("fap_staff_model").notNull().default("global"),
+  updatedAt: updatedAt(),
 });
 
 export const audit = pgTable("audit", {
@@ -366,3 +405,5 @@ export type ActionStatus = (typeof actionStatusEnum.enumValues)[number];
 export type OverallStatus = (typeof overallStatusEnum.enumValues)[number];
 export type AuditStatus = (typeof auditStatusEnum.enumValues)[number];
 export type ExtraKind = (typeof extraKindEnum.enumValues)[number];
+export type PinStatus = (typeof pinStatusEnum.enumValues)[number];
+export type FapStaffModel = (typeof fapStaffModelEnum.enumValues)[number];

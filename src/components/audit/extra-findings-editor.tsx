@@ -13,6 +13,7 @@ import type { Classification, ExtraKind } from "@/db/schema";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { ActionFields, EMPTY_ACTION } from "./action-fields";
 import { ClassificationSelect } from "./classification-select";
+import type { PersonOption } from "./person-option";
 import { PhotoStrip, type AttachmentRef } from "./photo-strip";
 import { SaveIndicator } from "./save-indicator";
 
@@ -27,11 +28,13 @@ function ExtraCard({
   auditPostId,
   data,
   index,
+  people,
   onDelete,
 }: {
   auditPostId: number;
   data: ExtraFindingData;
   index: number;
+  people: PersonOption[];
   onDelete: () => void;
 }) {
   const [v, setV] = useState<ExtraInput>({
@@ -115,6 +118,7 @@ function ExtraCard({
       </Field>
       <ActionFields
         label={isH1 ? "Recommendation" : "Required action"}
+        people={people}
         value={v.action}
         onChange={(action) => set({ action })}
       />
@@ -131,10 +135,12 @@ export function ExtraFindingsEditor({
   auditPostId,
   kind,
   initial,
+  people,
 }: {
   auditPostId: number;
   kind: ExtraKind;
   initial: ExtraFindingData[];
+  people: PersonOption[];
 }) {
   const [items, setItems] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -167,6 +173,7 @@ export function ExtraFindingsEditor({
           auditPostId={auditPostId}
           data={item}
           index={i}
+          people={people}
           onDelete={() => remove(item.id)}
         />
       ))}

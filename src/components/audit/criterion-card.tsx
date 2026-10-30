@@ -10,6 +10,7 @@ import { useAutosave } from "@/lib/hooks/use-autosave";
 import { cn } from "@/lib/utils";
 import { ActionFields, EMPTY_ACTION, type ActionState } from "./action-fields";
 import { ClassificationSelect } from "./classification-select";
+import type { PersonOption } from "./person-option";
 import { PhotoStrip, type AttachmentRef } from "./photo-strip";
 import { SaveIndicator } from "./save-indicator";
 
@@ -45,9 +46,11 @@ const ANSWER_TONE: Record<Answer, string> = {
 export function CriterionCard({
   auditPostId,
   data,
+  people,
   onAnswerChange,
 }: {
   auditPostId: number;
+  people: PersonOption[];
   data: CriterionData;
   onAnswerChange: (itemId: number, answer: Answer | null, classification: Classification | null) => void;
 }) {
@@ -163,7 +166,11 @@ export function CriterionCard({
                 />
               </Field>
               {state.classification !== "c" ? (
-                <ActionFields value={state.action} onChange={(action) => update({ action })} />
+                <ActionFields
+                  people={people}
+                  value={state.action}
+                  onChange={(action) => update({ action })}
+                />
               ) : null}
             </div>
           ) : state.answer && state.answer !== "na" ? (

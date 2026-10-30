@@ -2,6 +2,7 @@ import "server-only";
 
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { cache } from "react";
+import { personLabel } from "@/components/audit/person-option";
 import { db, schema } from "@/db";
 import type { Classification } from "@/db/schema";
 import {
@@ -60,6 +61,63 @@ export async function listAudits() {
 
 export async function listSites() {
   return db.select().from(s.site).orderBy(asc(s.site.id));
+}
+
+export async function listAuditors() {
+  return db.select().from(s.auditor).orderBy(asc(s.auditor.name));
+}
+
+export async function listActiveAuditors() {
+  const rows = await db
+    .select({
+      id: s.auditor.id,
+      name: s.auditor.name,
+      jobTitle: s.auditor.jobTitle,
+      organization: s.auditor.organization,
+    })
+    .from(s.auditor)
+    .where(eq(s.auditor.active, true))
+    .orderBy(asc(s.auditor.name));
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    label: personLabel(r),
+  }));
+}
+
+export async function listFapStaff() {
+  return db.select().from(s.fapStaff).orderBy(asc(s.fapStaff.name));
+}
+
+export async function listActiveFapStaff() {
+  const rows = await db
+    .select({
+      id: s.fapStaff.id,
+      name: s.fapStaff.name,
+      jobTitle: s.fapStaff.jobTitle,
+      organization: s.fapStaff.organization,
+      siteId: s.fapStaff.siteId,
+    })
+    .from(s.fapStaff)
+    .where(eq(s.fapStaff.active, true))
+    .orderBy(asc(s.fapStaff.name));
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    label: personLabel(r),
+    siteId: r.siteId,
+  }));
+}
+
+export async function getAppConfig() {
+  const rows = await db.select().from(s.appConfig).where(eq(s.appConfig.id, 1)).limit(1);
+  if (rows[0]) return rows[0];
+  const [created] = await db
+    .insert(s.appConfig)
+    .values({ id: 1, fapStaffModel: "global" })
+    .onConflictDoNothing()
+    .returning();
+  return created ?? { id: 1, fapStaffModel: "global" as const, updatedAt: new Date() };
 }
 
 export async function listProtocolVersions() {
