@@ -10,7 +10,7 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
 - [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Ongoing: phone/tablet smoke as needed.
 
-**App version:** see `package.json` / `src/lib/version.ts` / `CHANGELOG.md` (currently **0.3.1**).
+**App version:** see `package.json` / `src/lib/version.ts` / `CHANGELOG.md` (currently **0.3.2**).
 
 Deviations from the plan:
 
@@ -208,9 +208,9 @@ flowchart TD
 
 - Create a Vercel project and set the environment variables.
 - Use a Neon production branch, with development on a separate Neon branch.
-- Add the Vercel domain to the Auth trusted domains.
+- Add every browser origin that serves the app to Neon Auth **trusted domains** (Better Auth rejects unlisted `Origin` headers with **invalid origin** — this is not CORS). Production currently trusts `https://fap-audit-app.vercel.app` and custom domain `https://audit.mineaidhms.com` on Neon branch `main`.
 - Smoke-test on a phone and tablet.
-- **Done when:** you can sign in from your phone at the Vercel URL and complete a test audit.
+- **Done when:** you can sign in from your phone at the production URL and complete a test audit.
 
 ## Security and data handling
 
