@@ -27,7 +27,7 @@ export default async function AuditsPage() {
               <Card className="p-4 transition hover:ring-slate-400">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-semibold text-slate-900">{a.title}</p>
+                    <p className="font-semibold text-brand-accent">{a.title}</p>
                     <p className="text-sm text-slate-500">
                       {a.period ?? "No period"} · started {formatDate(a.startDate ?? a.createdAt)}
                     </p>

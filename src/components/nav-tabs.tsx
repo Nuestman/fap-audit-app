@@ -21,7 +21,7 @@ export function NavTabs({ tabs, className }: { tabs: NavTab[]; className?: strin
               className={cn(
                 "-mb-px flex flex-col items-center border-b-2 px-3 py-2 text-sm whitespace-nowrap",
                 active
-                  ? "border-slate-900 font-semibold text-slate-900"
+                  ? "border-brand font-semibold text-brand"
                   : "border-transparent text-slate-600 hover:text-slate-900",
               )}
             >

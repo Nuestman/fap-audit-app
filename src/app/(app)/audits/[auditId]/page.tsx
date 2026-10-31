@@ -24,7 +24,7 @@ export default async function AuditOverviewPage({ params }: PageProps<"/audits/[
             <Card className="h-full space-y-3 p-4 transition hover:ring-slate-400">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-lg font-semibold text-slate-900">{s.siteCode}</p>
+                  <p className="text-lg font-semibold text-brand-accent">{s.siteCode}</p>
                   <p className="text-xs text-slate-500">{s.siteName}</p>
                 </div>
                 {s.classifications.major_nc > 0 ? (

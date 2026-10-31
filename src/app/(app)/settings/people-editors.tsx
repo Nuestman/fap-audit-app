@@ -94,7 +94,7 @@ function Modal({
         className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
       >
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900">
+          <h3 id={titleId} className="text-sm font-semibold text-brand-accent">
             {title}
           </h3>
           <button
@@ -718,7 +718,7 @@ export function StaffModelPicker({ initial }: { initial: "global" | "site_assign
           className="mt-1"
         />
         <span>
-          <span className="font-medium">Site-assigned</span> — nurse-in-charge and post action
+          <span className="font-medium">Site-assigned</span> — staff on duty and post action
           owners only offer staff assigned to that FAP (plus unassigned)
         </span>
       </label>

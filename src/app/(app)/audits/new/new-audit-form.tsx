@@ -57,7 +57,7 @@ export function NewAuditForm({ sites, versions, auditors, defaultLead }: Props) 
               .map((s) => (
                 <label
                   key={s.id}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 ring-1 ring-slate-200 has-checked:bg-slate-50 has-checked:ring-slate-900"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 ring-1 ring-slate-200 has-checked:bg-slate-50 has-checked:ring-brand"
                 >
                   <input type="checkbox" name="siteIds" value={s.id} defaultChecked className="size-4" />
                   <span className="text-sm">

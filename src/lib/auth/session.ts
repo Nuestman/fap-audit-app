@@ -17,3 +17,6 @@ export async function requireUser(): Promise<SessionUser> {
   if (!user) redirect("/auth/sign-in");
   return user;
 }
+
+/** After sign-in, send people to the app home (not the public landing page). */
+export const APP_HOME = "/audits";

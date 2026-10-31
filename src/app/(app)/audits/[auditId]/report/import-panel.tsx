@@ -34,7 +34,7 @@ export function ImportPanel({ auditId, locked }: { auditId: number; locked: bool
   return (
     <Card className="space-y-3 p-4">
       <div>
-        <h2 className="text-sm font-semibold text-slate-900">Import a filled-in workbook</h2>
+        <h2 className="text-sm font-semibold text-brand-accent">Import a filled-in workbook</h2>
         <p className="mt-0.5 text-xs text-slate-500">
           Sheets named after a post (ODD, STP, KMS, GCS) are read. Filled cells overwrite the app&rsquo;s values;
           blank cells leave them unchanged. H1, H2 and H3 rows are added unless the same text already exists.

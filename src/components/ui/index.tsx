@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-slate-900 text-white hover:bg-slate-700 disabled:bg-slate-400",
+  primary: "bg-brand text-white hover:bg-brand/90 disabled:bg-slate-400",
   secondary:
     "bg-white text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 disabled:text-slate-400",
   ghost: "text-slate-700 hover:bg-slate-100",
@@ -13,7 +13,7 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 export function Button({
   variant = "primary",
@@ -32,7 +32,7 @@ export function ButtonLink({
 }
 
 const FIELD =
-  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-slate-900 disabled:bg-slate-50";
+  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand disabled:bg-slate-50";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(FIELD, className)} {...props} />;
@@ -116,7 +116,7 @@ export function PageHeader({
       {breadcrumb ? <div className="text-sm text-slate-500">{breadcrumb}</div> : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-brand-accent">{title}</h1>
           {description ? <p className="mt-1 text-sm text-slate-600">{description}</p> : null}
         </div>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
@@ -129,7 +129,7 @@ export function ProgressBar({ value, className }: { value: number; className?: s
   return (
     <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-slate-200", className)}>
       <div
-        className="h-full rounded-full bg-slate-900 transition-all"
+        className="h-full rounded-full bg-brand transition-all"
         style={{ width: `${Math.round(Math.min(1, Math.max(0, value)) * 100)}%` }}
       />
     </div>

@@ -301,7 +301,7 @@ function perSiteFindings(data: AuditDataset, findings: FindingRow[]) {
         [
           p.post.auditDate && `Visited ${formatDate(p.post.auditDate)}`,
           p.post.shift && `shift: ${p.post.shift}`,
-          p.post.nurseInCharge && `nurse in charge: ${p.post.nurseInCharge}`,
+          p.post.staffOnDuty && `staff on duty: ${p.post.staffOnDuty}`,
           p.post.ambulanceUnits && `ambulance units: ${p.post.ambulanceUnits}`,
         ]
           .filter(Boolean)

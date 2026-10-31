@@ -52,7 +52,7 @@ export function AuditDetailsForm({
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900">Audit details</h2>
+        <h2 className="text-sm font-semibold text-brand-accent">Audit details</h2>
         <SaveIndicator status={status} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -38,7 +38,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         {mode === "sign-in" ? (
           <>
             No account yet?{" "}
-            <Link href="/auth/sign-up" className="font-medium text-slate-900 underline">
+            <Link href="/auth/sign-up" className="font-medium text-brand underline">
               Create one
             </Link>
           </>

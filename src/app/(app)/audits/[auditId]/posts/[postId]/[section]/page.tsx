@@ -80,12 +80,12 @@ export default async function PostSectionPage({ params }: Props) {
           initial={{
             auditDate: post.auditDate,
             shift: post.shift,
-            nurseInCharge: post.nurseInCharge,
+            staffOnDuty: post.staffOnDuty,
             ambulanceUnits: post.ambulanceUnits,
           }}
         />
         <Card className="p-4">
-          <h3 className="mb-2 text-sm font-semibold text-slate-900">Sections</h3>
+          <h3 className="mb-2 text-sm font-semibold text-brand-accent">Sections</h3>
           <ul className="divide-y divide-slate-100">
             {protocol.sections.map((s) => {
               const answered = s.items.filter((i) => responseByItem.get(i.id)?.answer).length;
@@ -136,7 +136,7 @@ export default async function PostSectionPage({ params }: Props) {
     body = (
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-brand-accent">
             Section {sec.code} – {sec.title}
           </h2>
           {sec.subtitle ? <p className="text-sm text-slate-500">{sec.subtitle}</p> : null}
@@ -178,13 +178,13 @@ export default async function PostSectionPage({ params }: Props) {
       <div className="space-y-6">
         <section className="space-y-3">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">H1. Findings not covered by a checklist item</h2>
+            <h2 className="text-lg font-semibold text-brand-accent">H1. Findings not covered by a checklist item</h2>
             <p className="text-sm text-slate-500">Opportunities for improvement or non-conformities with no matching criterion.</p>
           </div>
           <ExtraFindingsEditor auditPostId={post.id} kind="h1" initial={extras("h1")} people={owners} />
         </section>
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-900">H2. Good practices deserving recognition</h2>
+          <h2 className="text-lg font-semibold text-brand-accent">H2. Good practices deserving recognition</h2>
           <GoodPracticesEditor
             auditPostId={post.id}
             initial={ws.practices.map((p) => ({
@@ -198,7 +198,7 @@ export default async function PostSectionPage({ params }: Props) {
         </section>
         <section className="space-y-3">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">H3. Other issues requiring resolution</h2>
+            <h2 className="text-lg font-semibold text-brand-accent">H3. Other issues requiring resolution</h2>
             <p className="text-sm text-slate-500">Facilities, staff welfare, fire safety and similar issues.</p>
           </div>
           <ExtraFindingsEditor auditPostId={post.id} kind="h3" initial={extras("h3")} people={owners} />
@@ -248,7 +248,7 @@ export default async function PostSectionPage({ params }: Props) {
     body = (
       <div className="space-y-4">
         <Card className="p-4">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">I1. Summary of findings by risk</h3>
+          <h3 className="mb-3 text-sm font-semibold text-brand-accent">I1. Summary of findings by risk</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {RISKS.map((r) => (
               <div key={r} className="rounded-lg bg-slate-50 p-3 text-center">
@@ -286,7 +286,7 @@ export default async function PostSectionPage({ params }: Props) {
     <div className="space-y-4">
       <div className="sticky top-14 z-20 -mx-4 bg-[#f6f7f9]/95 px-4 pt-1 backdrop-blur">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-base font-semibold text-slate-900">{post.site.code}</h2>
+          <h2 className="text-base font-semibold text-brand-accent">{post.site.code}</h2>
           <span className="text-sm text-slate-500">{post.site.name}</span>
         </div>
         <NavTabs tabs={tabs} />

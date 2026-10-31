@@ -18,7 +18,7 @@ import { NewSiteForm, SiteRow } from "./site-editors";
 function Section({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <Card className="p-4">
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-sm font-semibold text-brand-accent">{title}</h2>
       {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
       <div className="mt-3">{children}</div>
     </Card>
@@ -97,7 +97,7 @@ export default async function SettingsPage() {
 
       <Section
         title="FAP staff"
-        hint="Nurse-in-charge / ambulance driver and action owners. Assign a FAP when using the site-assigned model."
+        hint="Staff on duty and action owners. Assign a FAP when using the site-assigned model."
       >
         <FapStaffDirectory
           sites={siteOpts}
@@ -164,7 +164,7 @@ export default async function SettingsPage() {
           FAP Audit <span className="font-mono font-medium">v{APP_VERSION}</span>
         </p>
         <p className="mt-2 text-sm">
-          <Link href="/changelog" className="text-slate-900 underline">
+          <Link href="/changelog" className="text-brand underline">
             View changelog
           </Link>
         </p>

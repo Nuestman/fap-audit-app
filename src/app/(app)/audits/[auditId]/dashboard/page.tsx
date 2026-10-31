@@ -12,7 +12,7 @@ import { getAuditDataset, getAuditSummaries } from "@/lib/audit/queries";
 function Panel({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
     <Card className="p-4">
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-sm font-semibold text-brand-accent">{title}</h2>
       {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
       <div className="mt-3">{children}</div>
     </Card>

@@ -58,7 +58,7 @@ export async function saveCriterion(input: CriterionInput): Promise<{ responseId
 const DetailsInput = z.object({
   auditDate: isoDate,
   shift: text,
-  nurseInCharge: text,
+  staffOnDuty: text,
   ambulanceUnits: text,
 });
 
@@ -70,7 +70,7 @@ export async function savePostDetails(auditPostId: number, input: z.infer<typeof
     .set({
       auditDate: d.auditDate,
       shift: clean(d.shift),
-      nurseInCharge: clean(d.nurseInCharge),
+      staffOnDuty: clean(d.staffOnDuty),
       ambulanceUnits: clean(d.ambulanceUnits),
     })
     .where(eq(s.auditPost.id, id.parse(auditPostId)));

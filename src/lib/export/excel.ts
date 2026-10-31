@@ -409,7 +409,7 @@ function detailsSheet(wb: ExcelJS.Workbook, data: AuditDataset) {
     ws.getCell(r, 2).value = [
       post.post.auditDate && `Date: ${post.post.auditDate}`,
       post.post.shift && `Shift: ${post.post.shift}`,
-      post.post.nurseInCharge && `Nurse in charge: ${post.post.nurseInCharge}`,
+      post.post.staffOnDuty && `Staff on duty: ${post.post.staffOnDuty}`,
       post.post.ambulanceUnits && `Ambulance units: ${post.post.ambulanceUnits}`,
     ]
       .filter(Boolean)

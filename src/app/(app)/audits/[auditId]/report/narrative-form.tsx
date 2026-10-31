@@ -47,7 +47,7 @@ export function NarrativeForm({ auditId, initial }: { auditId: number; initial: 
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900">Report narrative</h2>
+        <h2 className="text-sm font-semibold text-brand-accent">Report narrative</h2>
         <SaveIndicator status={status} />
       </div>
       <div className="space-y-4">

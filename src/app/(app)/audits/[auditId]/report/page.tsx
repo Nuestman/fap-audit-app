@@ -37,7 +37,7 @@ export default async function ReportPage({ params }: PageProps<"/audits/[auditId
   return (
     <div className="space-y-6">
       <Card className="space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">Export</h2>
+        <h2 className="text-sm font-semibold text-brand-accent">Export</h2>
         <div className="flex flex-wrap gap-2">
           <a href={`/api/audits/${audit.id}/export/word`} className={DOWNLOAD}>
             <FileText className="size-4 text-sky-700" />
@@ -69,7 +69,7 @@ export default async function ReportPage({ params }: PageProps<"/audits/[auditId
         />
 
         <Card className="h-fit space-y-3 p-4">
-          <h2 className="text-sm font-semibold text-slate-900">What the report will contain</h2>
+          <h2 className="text-sm font-semibold text-brand-accent">What the report will contain</h2>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-slate-500">

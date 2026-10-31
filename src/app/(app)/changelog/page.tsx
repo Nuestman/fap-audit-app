@@ -31,7 +31,7 @@ export default async function ChangelogPage() {
           switch (row.type) {
             case "h2":
               return (
-                <h2 key={i} className="mt-6 border-t border-slate-100 pt-4 text-base font-semibold text-slate-900 first:mt-0 first:border-0 first:pt-0">
+                <h2 key={i} className="mt-6 border-t border-slate-100 pt-4 text-base font-semibold text-brand-accent first:mt-0 first:border-0 first:pt-0">
                   {row.text}
                 </h2>
               );

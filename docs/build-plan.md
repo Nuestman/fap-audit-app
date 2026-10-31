@@ -8,9 +8,9 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 2: Audit forms (sections A to G with autosave, supplementary tables, H1 to H3, I1 to I4, photo upload)
 - [x] Phase 3: Dashboard and action tracker
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
-- [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Ongoing: phone/tablet smoke as needed.
+- [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Public landing at `/`; app home at `/audits`. Ongoing: phone/tablet smoke as needed.
 
-**App version:** see `package.json` / `src/lib/version.ts` / `CHANGELOG.md` (currently **0.3.2**).
+**App version:** **1.0.0** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
 
 Deviations from the plan:
 
@@ -27,10 +27,11 @@ Deviations from the plan:
 
 ## Current state
 
-- Neon project **fap-audit** (`jolly-sun-18742594`, eu-west-2): branches **`main`** (production) and **`dev`** (local / Vercel preview). Drizzle migrations `0000`–`0002` applied on both.
-- App repo: https://github.com/Nuestman/fap-audit-app — production https://fap-audit-app.vercel.app
+- Neon project **fap-audit** (`jolly-sun-18742594`, eu-west-2): branches **`main`** (production) and **`dev`** (local / Vercel preview). Drizzle migrations `0000`–`0004` applied on both (`user_profile`, `staff_on_duty`).
+- App repo: https://github.com/Nuestman/fap-audit-app — GitHub **`main`** / **`development`**; production https://audit.mineaidhms.com (Vercel alias https://fap-audit-app.vercel.app).
 - Sibling source still useful: `fap-audit-report` (`protocol.md`, workbooks, `build_workbook.py`).
-- Directories in Settings: **Auditors** and **FAP staff** (table + modal CRUD); person pickers for lead/team/owners/nurse-in-charge; `app_config.fap_staff_model` global vs site-assigned.
+- Directories in Settings: **Auditors** and **FAP staff** (table + modal CRUD); person pickers for lead/team/owners/staff on duty; `app_config.fap_staff_model` global vs site-assigned.
+- Public landing at `/`; authenticated shell at `/audits` with profile + user badge.
 
 ## Technology
 
@@ -92,7 +93,7 @@ flowchart TD
 - **`fap_staff`:** directory of FAP staff (same contact fields plus qualification, PIN status/expiry, optional `site_id` assignment, active).
 - **`app_config`:** singleton settings (e.g. `fap_staff_model`: `global` or `site_assigned`).
 - **`audit`:** title (e.g. "Q4 2026 FAP Audit"), period, protocol version, lead auditor, auditors, status (draft, in progress or final), and the report narrative fields (executive summary, scope notes, limitations, conclusion).
-- **`audit_post`:** one per post in each audit. Holds audit date, shift, nurse-in-charge, ambulance units, and the I3 fields: overall status, key strengths, key risks and recommendation.
+- **`audit_post`:** one per post in each audit. Holds audit date, shift, staff on duty (person at the post during the visit), ambulance units, and the I3 fields: overall status, key strengths, key risks and recommendation.
 - **`item_response`:** one per post per criterion (unique together). Holds the answer (yes, no or na), evidence, finding, classification (major_nc, minor_nc, ofi, obs or c), original note, `updated_by` and `updated_at`.
 - **`extra_finding`:** entries for H1 (no matching criterion) and H3 (other issues). Holds finding or issue, linked reference, evidence, consequence, interim control, classification and original note.
 - **`good_practice`:** H2 entries.

@@ -1,0 +1,40 @@
+name: Branch sync
+
+# Fail PRs into main when the head branch is behind main (the classic
+# "1 commit ahead, 1 commit behind" divergence). Keeps merges linear and
+# forces `development` (or any feature branch) to absorb main first.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  up-to-date-with-main:
+    name: Up to date with main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure PR includes every commit from main
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if git merge-base --is-ancestor origin/main "$HEAD_SHA"; then
+            echo "OK: $HEAD_SHA contains all commits from origin/main."
+            exit 0
+          fi
+          echo "::error::This branch is behind main. Merge or rebase origin/main into your branch, resolve conflicts, push, then re-run checks."
+          echo "Tip (from development):"
+          echo "  git fetch origin"
+          echo "  git checkout development"
+          echo "  git merge origin/main"
+          echo "  # resolve conflicts, then:"
+          echo "  git push origin development"
+          exit 1
