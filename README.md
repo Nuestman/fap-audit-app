@@ -52,7 +52,7 @@ Neon Auth **trusted domains** on production must include every browser origin th
 | `main` | Production |
 | `development` | Local / integration; open PRs into `main` from here |
 
-CI runs lint, typecheck, and build. PRs into `main` must be **up to date with `main`** (Branch sync check) to avoid “1 ahead, 1 behind” merges — details in [`docs/git-workflow.md`](docs/git-workflow.md).
+CI runs lint, typecheck, and build. PRs into `main` must be **up to date with `main`** (Branch sync). After a merge to `main`, **Sync development from main** merges `main` back into `development` automatically. Prefer a **merge commit** (not squash) for `development` → `main`. Details: [`docs/git-workflow.md`](docs/git-workflow.md).
 
 ## Docs
 
