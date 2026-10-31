@@ -2,6 +2,19 @@ import type { ActionStatus, Answer, Classification, ExtraKind } from "@/db/schem
 import { compareCodes, severityRank } from "./classification";
 import type { AuditDataset } from "./queries";
 
+export function findingHref(auditId: number, f: Pick<FindingRow, "postId" | "sectionCode" | "ref">) {
+  return f.sectionCode
+    ? `/audits/${auditId}/posts/${f.postId}/${f.sectionCode.toLowerCase()}#${f.ref}`
+    : `/audits/${auditId}/posts/${f.postId}/h`;
+}
+
+export function findingsOf(
+  findings: FindingRow[],
+  classification: Classification,
+): FindingRow[] {
+  return findings.filter((f) => f.classification === classification);
+}
+
 export type FindingAction = {
   id: number;
   action: string | null;

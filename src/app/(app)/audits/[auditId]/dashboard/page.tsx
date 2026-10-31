@@ -1,23 +1,63 @@
-import { AlertTriangle, Repeat } from "lucide-react";
+import { Repeat } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { ClassificationBadge, ComplianceCell } from "@/components/audit/badges";
+import { FindingList } from "@/components/audit/finding-list";
 import { ClassificationChart, ComplianceChart, RiskChart } from "@/components/dashboard/charts";
-import { Card, EmptyState } from "@/components/ui";
-import { collectFindings } from "@/lib/audit/findings";
+import { ButtonLink, Card, EmptyState } from "@/components/ui";
+import type { Classification } from "@/db/schema";
+import { classificationLabel } from "@/lib/audit/classification";
+import { collectFindings, findingHref, findingsOf } from "@/lib/audit/findings";
 import { crossSiteThemes } from "@/lib/audit/themes";
 import { getAuditDataset, getAuditSummaries } from "@/lib/audit/queries";
 
-function Panel({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
+function Panel({
+  title,
+  hint,
+  action,
+  children,
+}: {
+  title: ReactNode;
+  hint?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <Card className="p-4">
-      <h2 className="text-sm font-semibold text-brand-accent">{title}</h2>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-semibold text-brand-accent">{title}</h2>
+          {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+        </div>
+        {action}
+      </div>
       <div className="mt-3">{children}</div>
     </Card>
   );
 }
+
+const CLASSIFIED_PANELS: {
+  classification: Classification;
+  hint: string;
+  empty: string;
+}[] = [
+  {
+    classification: "major_nc",
+    hint: "Critical risk: immediate corrective action required.",
+    empty: "No Major NCs recorded.",
+  },
+  {
+    classification: "minor_nc",
+    hint: "Isolated failures that still need corrective action.",
+    empty: "No Minor NCs recorded.",
+  },
+  {
+    classification: "ofi",
+    hint: "Requirements met, but effectiveness or maturity could improve.",
+    empty: "No opportunities for improvement recorded.",
+  },
+];
 
 export default async function DashboardPage({ params }: PageProps<"/audits/[auditId]/dashboard">) {
   const { auditId } = await params;
@@ -26,12 +66,8 @@ export default async function DashboardPage({ params }: PageProps<"/audits/[audi
   const { audit, protocol } = data;
   const summaries = await getAuditSummaries(audit, protocol);
   const findings = collectFindings(data);
-  const majors = findings.filter((f) => f.classification === "major_nc");
   const themes = crossSiteThemes(findings);
-  const findingHref = (postId: number, sectionCode: string | null, ref: string) =>
-    sectionCode
-      ? `/audits/${audit.id}/posts/${postId}/${sectionCode.toLowerCase()}#${ref}`
-      : `/audits/${audit.id}/posts/${postId}/h`;
+  const findingsBase = `/audits/${audit.id}/findings`;
 
   const totals = summaries.reduce(
     (t, s) => ({
@@ -44,6 +80,15 @@ export default async function DashboardPage({ params }: PageProps<"/audits/[audi
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-slate-600">
+          {findings.length} findings across {summaries.length} posts.
+        </p>
+        <ButtonLink href={findingsBase} variant="secondary">
+          Browse all findings
+        </ButtonLink>
+      </div>
+
       <Panel
         title="Compliance by section"
         hint="Yes ÷ (Yes + No) for each section. N/A and unanswered criteria are excluded."
@@ -126,35 +171,28 @@ export default async function DashboardPage({ params }: PageProps<"/audits/[audi
         </Panel>
       </div>
 
-      <Panel
-        title={`Major non-conformities (${majors.length})`}
-        hint="Critical risk: immediate corrective action required."
-      >
-        {majors.length === 0 ? (
-          <EmptyState>No Major NCs recorded.</EmptyState>
-        ) : (
-          <ul className="divide-y divide-slate-100">
-            {majors.map((f) => (
-              <li key={`${f.postId}-${f.source}-${f.ref}-${f.finding}`} className="py-3">
-                <Link href={findingHref(f.postId, f.sectionCode, f.ref)} className="group block">
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <AlertTriangle className="size-3.5 text-red-600" />
-                    <span className="font-semibold text-slate-900">{f.siteCode}</span>
-                    <code className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-700">{f.ref}</code>
-                    {f.criterion ? <span className="text-slate-500">{f.criterion}</span> : null}
-                  </div>
-                  <p className="mt-1 text-sm text-slate-800 group-hover:underline">
-                    {f.finding || "No finding text recorded yet."}
-                  </p>
-                  {f.action?.action ? (
-                    <p className="mt-1 text-xs text-slate-500">Action: {f.action.action}</p>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
+      {CLASSIFIED_PANELS.map(({ classification, hint, empty }) => {
+        const rows = findingsOf(findings, classification);
+        const label = classificationLabel(classification);
+        return (
+          <Panel
+            key={classification}
+            title={`${label}s (${rows.length})`}
+            hint={hint}
+            action={
+              <ButtonLink
+                href={`${findingsBase}?classification=${classification}`}
+                variant="ghost"
+                className="text-xs"
+              >
+                View all
+              </ButtonLink>
+            }
+          >
+            <FindingList auditId={audit.id} findings={rows} empty={empty} />
+          </Panel>
+        );
+      })}
 
       <Panel
         title={`Cross-site themes (${themes.length})`}
@@ -175,7 +213,7 @@ export default async function DashboardPage({ params }: PageProps<"/audits/[audi
                   {t.findings.map((f) => (
                     <li key={f.postId} className="flex flex-wrap items-baseline gap-2 text-xs">
                       <Link
-                        href={findingHref(f.postId, f.sectionCode, f.ref)}
+                        href={findingHref(audit.id, f)}
                         className="font-semibold text-slate-900 underline"
                       >
                         {f.siteCode}

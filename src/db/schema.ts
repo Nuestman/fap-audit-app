@@ -335,6 +335,27 @@ export const signOff = pgTable("sign_off", {
   sort: integer("sort").notNull().default(0),
 });
 
+/**
+ * Append-only edit history for audit data. Not shown in Excel/Word exports.
+ * `changes` maps field → { from, to }. Live tables keep only the current values.
+ */
+export const changeEvent = pgTable("change_event", {
+  id: serial("id").primaryKey(),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+  actor: text("actor").notNull(),
+  entity: text("entity").notNull(),
+  entityId: integer("entity_id").notNull(),
+  auditId: integer("audit_id").references(() => audit.id, { onDelete: "set null" }),
+  auditPostId: integer("audit_post_id").references(() => auditPost.id, { onDelete: "set null" }),
+  action: text("action").notNull(),
+  source: text("source").notNull().default("ui"),
+  changes: jsonb("changes")
+    .$type<Record<string, { from: unknown; to: unknown }>>()
+    .notNull()
+    .default({}),
+  summary: text("summary"),
+});
+
 // ---------------------------------------------------------------- relations
 
 export const protocolVersionRelations = relations(protocolVersion, ({ many }) => ({

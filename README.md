@@ -2,7 +2,7 @@
 
 Web app for running the First Aid Post & Ambulance audit protocol: public landing, section forms, dashboard, action tracker, Excel/Word export, workbook import, and staff directories.
 
-**Version:** **1.0.0** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
+**Version:** **1.0.2** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
 
 **Production:** https://audit.mineaidhms.com (also https://fap-audit-app.vercel.app)
 
@@ -58,6 +58,7 @@ CI runs lint, typecheck, and build. PRs into `main` must be **up to date with `m
 
 - [`docs/build-plan.md`](docs/build-plan.md) — phased build plan and current status
 - [`docs/git-workflow.md`](docs/git-workflow.md) — branching and merge rules
+- [`docs/dashboard-metrics.md`](docs/dashboard-metrics.md) — how dashboard compliance, risk, Major NCs, and themes are computed
 - [`CHANGELOG.md`](CHANGELOG.md) — release history
 - `/changelog` in the app — same changelog in the UI
 

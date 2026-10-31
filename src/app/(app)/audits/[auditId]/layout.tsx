@@ -29,6 +29,7 @@ export default async function AuditLayout({
             { href: base, label: "Overview", exact: true },
             ...audit.posts.map((p) => ({ href: `${base}/posts/${p.id}`, label: p.site.code })),
             { href: `${base}/dashboard`, label: "Dashboard" },
+            { href: `${base}/findings`, label: "Findings" },
             { href: `${base}/report`, label: "Report & export" },
           ]}
         />
