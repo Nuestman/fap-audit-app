@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Ensure brand utilities are always emitted (prod CSS was missing them). */
+@source inline("{bg,text,border,outline,ring,from,to,fill,stroke}-{brand,brand-accent}");
+@source inline("hover:bg-brand/90 focus:ring-brand focus-visible:outline-brand has-checked:ring-brand");
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

@@ -114,12 +114,12 @@ export function PageHeader({
   return (
     <div className="mb-6 space-y-2">
       {breadcrumb ? <div className="text-sm text-slate-500">{breadcrumb}</div> : null}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-semibold tracking-tight text-brand-accent">{title}</h1>
           {description ? <p className="mt-1 text-sm text-slate-600">{description}</p> : null}
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
       </div>
     </div>
   );
