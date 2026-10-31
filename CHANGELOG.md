@@ -3,6 +3,12 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.1] — 2026-10-31
+
+### Fixed
+- Production brand colors (`bg-brand`, `text-brand-accent`, etc.) were missing from the built CSS, so primary buttons rendered as white-on-white. Wired the official Tailwind v4 PostCSS plugin, safelisted brand utilities, and dropped the custom Turbopack CSS loader override.
+- Empty audits list now also shows a **New audit** CTA (header action was already present but invisible without brand styles).
+
 ## [1.0.0] — 2026-10-30
 
 First production release for live FAP / ambulance audits on `audit.mineaidhms.com`.
