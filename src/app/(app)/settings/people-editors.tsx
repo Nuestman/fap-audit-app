@@ -1,7 +1,14 @@
 "use client";
 
 import { Pencil, Plus, X } from "lucide-react";
-import { useActionState, useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Badge, Button, Field, Input, Select } from "@/components/ui";
 import type { PinStatus } from "@/db/schema";
 import { createAuditor, createFapStaff, saveAuditor, saveFapStaff, saveFapStaffModel } from "./actions";
@@ -183,30 +190,19 @@ export function AuditorsDirectory({ rows }: { rows: AuditorRow[] }) {
   const [draft, setDraft] = useState<AuditorState>(EMPTY_AUDITOR);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [createState, createAction, createPending] = useActionState(createAuditor, null);
-  const [addSubmitted, setAddSubmitted] = useState(false);
+  const [createKey, setCreateKey] = useState(0);
 
   function close() {
     setMode("closed");
     setEditing(null);
     setError(null);
-    setAddSubmitted(false);
   }
-
-  useEffect(() => {
-    if (addSubmitted && !createPending && createState === null) {
-      setMode("closed");
-      setEditing(null);
-      setError(null);
-      setAddSubmitted(false);
-    }
-  }, [addSubmitted, createPending, createState]);
 
   function openAdd() {
     setError(null);
     setDraft(EMPTY_AUDITOR);
     setEditing(null);
-    setAddSubmitted(false);
+    setCreateKey((k) => k + 1);
     setMode("add");
   }
 
@@ -320,18 +316,26 @@ export function AuditorsDirectory({ rows }: { rows: AuditorRow[] }) {
             </div>
           </form>
         ) : (
-          <CreateAuditorForm
-            action={(fd) => {
-              setAddSubmitted(true);
-              createAction(fd);
-            }}
-            pending={createPending}
-            error={createState?.error ?? null}
-            onCancel={close}
-          />
+          <AuditorCreateForm key={createKey} onClose={close} onCancel={close} />
         )}
       </Modal>
     </div>
+  );
+}
+
+function AuditorCreateForm({ onClose, onCancel }: { onClose: () => void; onCancel: () => void }) {
+  const [createState, createAction, createPending] = useActionState(createAuditor, null);
+  if (createState && "ok" in createState && createState.ok) {
+    queueMicrotask(onClose);
+    return null;
+  }
+  return (
+    <CreateAuditorForm
+      action={createAction}
+      pending={createPending}
+      error={createState && "error" in createState ? createState.error : null}
+      onCancel={onCancel}
+    />
   );
 }
 
@@ -386,30 +390,19 @@ export function FapStaffDirectory({ rows, sites }: { rows: StaffRow[]; sites: Si
   const [draft, setDraft] = useState<StaffState>(EMPTY_STAFF);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [createState, createAction, createPending] = useActionState(createFapStaff, null);
-  const [addSubmitted, setAddSubmitted] = useState(false);
+  const [createKey, setCreateKey] = useState(0);
 
   function close() {
     setMode("closed");
     setEditing(null);
     setError(null);
-    setAddSubmitted(false);
   }
-
-  useEffect(() => {
-    if (addSubmitted && !createPending && createState === null) {
-      setMode("closed");
-      setEditing(null);
-      setError(null);
-      setAddSubmitted(false);
-    }
-  }, [addSubmitted, createPending, createState]);
 
   function openAdd() {
     setError(null);
     setDraft(EMPTY_STAFF);
     setEditing(null);
-    setAddSubmitted(false);
+    setCreateKey((k) => k + 1);
     setMode("add");
   }
 
@@ -594,19 +587,35 @@ export function FapStaffDirectory({ rows, sites }: { rows: StaffRow[]; sites: Si
             </div>
           </form>
         ) : (
-          <CreateFapStaffForm
-            action={(fd) => {
-              setAddSubmitted(true);
-              createAction(fd);
-            }}
-            pending={createPending}
-            error={createState?.error ?? null}
-            sites={sites}
-            onCancel={close}
-          />
+          <FapStaffCreateForm key={createKey} sites={sites} onClose={close} onCancel={close} />
         )}
       </Modal>
     </div>
+  );
+}
+
+function FapStaffCreateForm({
+  sites,
+  onClose,
+  onCancel,
+}: {
+  sites: SiteOpt[];
+  onClose: () => void;
+  onCancel: () => void;
+}) {
+  const [createState, createAction, createPending] = useActionState(createFapStaff, null);
+  if (createState && "ok" in createState && createState.ok) {
+    queueMicrotask(onClose);
+    return null;
+  }
+  return (
+    <CreateFapStaffForm
+      action={createAction}
+      pending={createPending}
+      error={createState && "error" in createState ? createState.error : null}
+      sites={sites}
+      onCancel={onCancel}
+    />
   );
 }
 

@@ -67,6 +67,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="landing-fade-in landing-delay-2 relative min-h-[40vh] overflow-hidden border-t border-slate-200 lg:min-h-0 lg:border-t-0 lg:border-l">
+            {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed product screenshot */}
             <img
               src="/landing/hero-dashboard.png"
               alt="FAP Audit dashboard showing compliance by first aid post"
