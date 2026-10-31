@@ -3,6 +3,19 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.2] — 2026-10-31
+
+### Added
+- Dashboard panels for **Minor NCs** and **OFIs** alongside Major NCs, each with a link to the filtered Findings view.
+- Aggregated **Findings** page (`/audits/[auditId]/findings`) with filters for post, classification, risk, and source, plus quick classification chips. New audit nav tab.
+- [`docs/dashboard-metrics.md`](docs/dashboard-metrics.md) — how compliance, completion, classification, risk, Major/Minor/OFI lists, and cross-site themes are computed.
+
+### Changed
+- Finding list UI shared between dashboard panels and the Findings page (`FindingList`).
+
+### Notes
+- H1 **Linked criterion / reference** is free text (`extra_finding.linked_ref`), not a protocol FK. Existing unlinked H1 rows on Neon **dev** and **main** were backfilled with ISO / related-criterion references (ops data, not a migration).
+
 ## [1.0.1] — 2026-10-31
 
 ### Fixed
@@ -81,6 +94,8 @@ First production release for live FAP / ambulance audits on `audit.mineaidhms.co
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.2]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.2...v1.0.0
 [0.3.2]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.0...v0.3.1

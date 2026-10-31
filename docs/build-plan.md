@@ -10,7 +10,7 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
 - [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Public landing at `/`; app home at `/audits`. Ongoing: phone/tablet smoke as needed.
 
-**App version:** **1.0.0** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
+**App version:** **1.0.2** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
 
 Deviations from the plan:
 
@@ -126,8 +126,10 @@ flowchart TD
 - **`/audits/[auditId]/dashboard`:**
   - A heatmap of compliance by post and section.
   - Findings by classification and by risk, for each post.
-  - A list of Major NCs.
+  - Lists of Major NCs, Minor NCs, and OFIs; link to the aggregated Findings page.
   - Cross-site themes: criteria answered No at two or more posts, flagged as possibly systemic.
+  - Metric definitions: see [`dashboard-metrics.md`](dashboard-metrics.md).
+- **`/audits/[auditId]/findings`:** all findings across posts, filterable by post, classification, risk, and source.
 - **`/actions`:** the action tracker across all audits. Filter by post, owner, status and overdue; close an action with close-out evidence; owner uses the person picker.
 - **`/audits/[auditId]/report`:**
   - Edit the narrative fields.
