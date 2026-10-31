@@ -19,7 +19,14 @@ export default async function AuditsPage() {
         }
       />
       {audits.length === 0 ? (
-        <EmptyState>No audits yet. Start one with “New audit”.</EmptyState>
+        <EmptyState>
+          <p>No audits yet.</p>
+          <div className="mt-4 flex justify-center">
+            <ButtonLink href="/audits/new">
+              <Plus className="size-4" /> New audit
+            </ButtonLink>
+          </div>
+        </EmptyState>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {audits.map((a) => (
