@@ -124,7 +124,7 @@ export function SupplementaryTable({
   const showTotal = table.columns.every((c) => c.type === "time");
   return (
     <Card className="p-4">
-      <h3 className="mb-2 text-sm font-semibold text-slate-900">
+      <h3 className="mb-2 text-sm font-semibold text-brand-accent">
         {`${table.code}. ${table.title}`}
       </h3>
       <div className="-mx-4 overflow-x-auto px-4">

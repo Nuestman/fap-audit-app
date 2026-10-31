@@ -137,7 +137,7 @@ export const auditor = pgTable("auditor", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** FAP staff directory — nurse-in-charge and action owners. Optional site assignment for site_assigned model. */
+/** FAP staff directory — staff on duty and action owners. Optional site assignment for site_assigned model. */
 export const fapStaff = pgTable("fap_staff", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
@@ -158,6 +158,17 @@ export const fapStaff = pgTable("fap_staff", {
 export const appConfig = pgTable("app_config", {
   id: integer("id").primaryKey().default(1),
   fapStaffModel: fapStaffModelEnum("fap_staff_model").notNull().default("global"),
+  updatedAt: updatedAt(),
+});
+
+/** App-owned profile extras for a Neon Auth user (avatar + optional contact fields). */
+export const userProfile = pgTable("user_profile", {
+  userId: text("user_id").primaryKey(),
+  jobTitle: text("job_title"),
+  organisation: text("organisation"),
+  phone: text("phone"),
+  avatarData: bytea("avatar_data"),
+  avatarMimeType: text("avatar_mime_type"),
   updatedAt: updatedAt(),
 });
 
@@ -194,7 +205,7 @@ export const auditPost = pgTable(
       .references(() => site.id),
     auditDate: date("audit_date"),
     shift: text("shift"),
-    nurseInCharge: text("nurse_in_charge"),
+    staffOnDuty: text("staff_on_duty"),
     ambulanceUnits: text("ambulance_units"),
     overallStatus: overallStatusEnum("overall_status"),
     keyStrengths: text("key_strengths"),

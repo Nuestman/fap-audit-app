@@ -11,7 +11,7 @@ import { SaveIndicator } from "./save-indicator";
 type Details = {
   auditDate: string | null;
   shift: string | null;
-  nurseInCharge: string | null;
+  staffOnDuty: string | null;
   ambulanceUnits: string | null;
 };
 
@@ -38,7 +38,7 @@ export function PostDetailsForm({
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">Audit details for this post</h3>
+        <h3 className="text-sm font-semibold text-brand-accent">Audit details for this post</h3>
         <SaveIndicator status={status} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -57,12 +57,12 @@ export function PostDetailsForm({
             ))}
           </Select>
         </Field>
-        <Field label="Nurse-in-charge / ambulance driver">
+        <Field label="Staff on duty" hint="Person at the post during this visit">
           <PersonPicker
             mode="single"
             people={staff}
-            value={v.nurseInCharge}
-            onChange={(nurseInCharge) => set({ nurseInCharge })}
+            value={v.staffOnDuty}
+            onChange={(staffOnDuty) => set({ staffOnDuty })}
           />
         </Field>
         <Field label="Ambulance(s) audited" hint="(unit numbers)">

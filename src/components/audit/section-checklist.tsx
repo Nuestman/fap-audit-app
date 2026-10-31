@@ -70,7 +70,7 @@ export function SectionChecklist({
               onClick={() => applyFilter(f.key)}
               className={cn(
                 "rounded-md px-3 py-1 text-sm",
-                filter === f.key ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100",
+                filter === f.key ? "bg-brand text-white" : "text-slate-600 hover:bg-slate-100",
               )}
             >
               {f.label}

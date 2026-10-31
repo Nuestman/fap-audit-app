@@ -15,7 +15,7 @@ export default async function NewAuditPage() {
   return (
     <>
       <PageHeader
-        breadcrumb={<Link href="/">Audits</Link>}
+        breadcrumb={<Link href="/audits">Audits</Link>}
         title="New audit"
         description="Creates a checklist for each selected post using the chosen protocol version."
       />

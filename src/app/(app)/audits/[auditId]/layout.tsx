@@ -17,10 +17,10 @@ export default async function AuditLayout({
     <div className="space-y-5">
       <div className="space-y-3">
         <div className="text-sm text-slate-500">
-          <Link href="/">Audits</Link> /
+          <Link href="/audits">Audits</Link> /
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{audit.title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-brand-accent">{audit.title}</h1>
           <Badge>{audit.status.replace("_", " ")}</Badge>
         </div>
         <NavTabs

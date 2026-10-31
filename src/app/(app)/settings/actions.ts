@@ -102,10 +102,12 @@ export async function saveAuditor(id: number, input: z.infer<typeof AuditorInput
   refresh();
 }
 
+type CreateResult = { ok: true } | { error: string };
+
 export async function createAuditor(
-  _prev: { error: string } | null,
+  _prev: CreateResult | null,
   formData: FormData,
-): Promise<{ error: string } | null> {
+): Promise<CreateResult> {
   await requireUser();
   const parsed = AuditorInput.omit({ active: true }).safeParse({
     name: formData.get("name"),
@@ -130,7 +132,7 @@ export async function createAuditor(
     .returning({ id: schema.auditor.id });
   if (inserted.length === 0) return { error: `"${parsed.data.name}" is already in the auditors list` };
   refresh();
-  return null;
+  return { ok: true };
 }
 
 export async function saveFapStaff(id: number, input: z.infer<typeof FapStaffInput>) {
@@ -156,9 +158,9 @@ export async function saveFapStaff(id: number, input: z.infer<typeof FapStaffInp
 }
 
 export async function createFapStaff(
-  _prev: { error: string } | null,
+  _prev: CreateResult | null,
   formData: FormData,
-): Promise<{ error: string } | null> {
+): Promise<CreateResult> {
   await requireUser();
   const siteRaw = String(formData.get("siteId") ?? "").trim();
   const parsed = FapStaffInput.omit({ active: true }).safeParse({
@@ -192,7 +194,7 @@ export async function createFapStaff(
     .returning({ id: schema.fapStaff.id });
   if (inserted.length === 0) return { error: `"${parsed.data.name}" is already in the FAP staff list` };
   refresh();
-  return null;
+  return { ok: true };
 }
 
 export async function saveFapStaffModel(model: FapStaffModel) {

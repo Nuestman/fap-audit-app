@@ -3,6 +3,24 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.0] — 2026-10-30
+
+First production release for live FAP / ambulance audits on `audit.mineaidhms.com`.
+
+### Added
+- Public **landing page** at `/` (white app-style header, product preview). Signed-in home is `/audits`.
+- **Profile** page (`/profile`): edit display name, job title, organisation, phone; upload or remove profile picture (Postgres `user_profile`).
+- Migration `0003_user_profile` (profile extras keyed by Neon Auth user id).
+- Migration `0004_staff_on_duty` (`audit_post.nurse_in_charge` → `staff_on_duty`).
+- Header **user badge** dropdown (avatar or initials, Profile, Settings, Changelog, Sign out).
+- MineAid brand mark in the shell; GitHub Actions **CI** (lint / typecheck / build) and **Branch sync** (block PRs into `main` that are behind `main`).
+- `docs/git-workflow.md` — `main` / `development` branching and how to stay up to date.
+
+### Changed
+- Post visit field renamed **Nurse-in-charge** → **Staff on duty** (person at the post during the visit, not a fixed ward-manager role). Labels updated in UI, Excel/Word export, workbook builder, and protocol notes.
+- Auth redirects: sign-in/up → `/audits`; sign-out → landing `/`. Middleware protects app routes only so `/` stays public.
+- Neon Auth trusted domains include `https://audit.mineaidhms.com` (ops; see 0.3.2 note).
+
 ## [0.3.2] — 2026-10-30
 
 ### Fixed
@@ -23,7 +41,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version 
 ### Added
 - Richer **Auditors** directory: organisation, job title, optional email, phone, employee number.
 - Richer **FAP staff** directory: organisation, job title, qualification, PIN status and expiry, optional contact fields, optional FAP assignment.
-- **FAP staff model** setting: *Global* (default) vs *Site-assigned* (nurse-in-charge and post action owners filter by assigned FAP).
+- **FAP staff model** setting: *Global* (default) vs *Site-assigned* (staff on duty and post action owners filter by assigned FAP).
 - Picker labels show `Name — Job title (Org)`.
 - App version in the shell footer, with a **Changelog** page (`/changelog`).
 
@@ -36,7 +54,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version 
 
 ### Added
 - **Auditors** and **FAP staff** directories in Settings (CRUD, active flag), mirroring First aid posts.
-- Shared **PersonPicker** (single + multi + Other) for lead auditor, audit team, nurse-in-charge, and action owners.
+- Shared **PersonPicker** (single + multi + Other) for lead auditor, audit team, staff on duty, and action owners.
 - Action owners draw from auditors and FAP staff together.
 
 ### Changed
@@ -57,6 +75,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version 
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.2...v1.0.0
 [0.3.2]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.2.0...v0.3.0

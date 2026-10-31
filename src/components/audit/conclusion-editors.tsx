@@ -35,7 +35,7 @@ export function ConclusionForm({ auditPostId, initial }: { auditPostId: number; 
   return (
     <Card className="space-y-3 p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">I3. Overall auditor conclusion</h3>
+        <h3 className="text-sm font-semibold text-brand-accent">I3. Overall auditor conclusion</h3>
         <SaveIndicator status={status} />
       </div>
       <Field label="Overall status">
@@ -107,7 +107,7 @@ function PriorityInput({ action }: { action: PriorityAction }) {
 export function PriorityList({ actions }: { actions: PriorityAction[] }) {
   return (
     <Card className="p-4">
-      <h3 className="text-sm font-semibold text-slate-900">I2. Priority corrective action plan</h3>
+      <h3 className="text-sm font-semibold text-brand-accent">I2. Priority corrective action plan</h3>
       <p className="mb-3 text-xs text-slate-500">
         Number the actions in order of priority (1 = most urgent). Actions are edited on their findings.
       </p>
@@ -180,7 +180,7 @@ function SignOffLine({ row }: { row: SignOffRow }) {
 export function SignOffEditor({ rows }: { rows: SignOffRow[] }) {
   return (
     <Card className="p-4">
-      <h3 className="mb-1 text-sm font-semibold text-slate-900">I4. Sign-off</h3>
+      <h3 className="mb-1 text-sm font-semibold text-brand-accent">I4. Sign-off</h3>
       <p className="mb-2 text-xs text-slate-500">Typed name and date; signatures go on the printed report.</p>
       {rows.map((r) => (
         <SignOffLine key={r.id} row={r} />

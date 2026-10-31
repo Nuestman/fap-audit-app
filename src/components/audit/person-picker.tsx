@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Input, Select } from "@/components/ui";
 import type { PersonOption } from "./person-option";
 
@@ -35,16 +35,10 @@ function SinglePicker({
   const known = useMemo(() => new Set(people.map((p) => p.name)), [people]);
   const current = value?.trim() || "";
   const isKnown = current !== "" && known.has(current);
-  // Empty string after choosing Other used to snap back to "—"; keep Other open with local state.
-  const [otherOpen, setOtherOpen] = useState(() => Boolean(current && !known.has(current)));
-
-  useEffect(() => {
-    if (isKnown) setOtherOpen(false);
-    else if (current) setOtherOpen(true);
-  }, [isKnown, current]);
-
-  const selectValue = isKnown ? current : otherOpen ? OTHER : "";
-  const showOther = selectValue === OTHER;
+  // Keep Other selected when the free-text value is empty (avoid snapping back to "—").
+  const [pickedOther, setPickedOther] = useState(() => Boolean(current && !known.has(current)));
+  const showOther = !isKnown && (pickedOther || current !== "");
+  const selectValue = isKnown ? current : showOther ? OTHER : "";
 
   const groups = useMemo(() => {
     const map = new Map<string | undefined, PersonOption[]>();
@@ -65,14 +59,14 @@ function SinglePicker({
         onChange={(e) => {
           const v = e.target.value;
           if (v === "") {
-            setOtherOpen(false);
+            setPickedOther(false);
             onChange(null);
           } else if (v === OTHER) {
-            setOtherOpen(true);
+            setPickedOther(true);
             // Clear a directory name so the free-text box starts empty; keep an orphan custom value.
             onChange(isKnown ? null : value);
           } else {
-            setOtherOpen(false);
+            setPickedOther(false);
             onChange(v);
           }
         }}

@@ -22,6 +22,20 @@
       "when": 1793362059693,
       "tag": "0002_people_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793374800000,
+      "tag": "0003_user_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793378600000,
+      "tag": "0004_staff_on_duty",
+      "breakpoints": true
     }
   ]
 }
