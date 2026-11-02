@@ -3,6 +3,12 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.4] — 2026-11-02
+
+### Fixed
+- ESLint `set-state-in-effect` on the Previous values control — use the `hasHistory` prop directly instead of syncing it in `useEffect`.
+- Dependabot / `npm audit` **minimatch** moderate DoS (GHSA-g3hv-75wg-m249): pin `minimatch` ≥11.0.1 via `package.json` overrides (eslint + exceljs transitive trees). Audit reports **0 vulnerabilities**.
+
 ## [1.0.3] — 2026-10-31
 
 ### Added
@@ -104,6 +110,7 @@ First production release for live FAP / ambulance audits on `audit.mineaidhms.co
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.4]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.0...v1.0.1
