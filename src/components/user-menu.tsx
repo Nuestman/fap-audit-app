@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, FileText, LogOut, Settings, UserRound } from "lucide-react";
+import { ChevronDown, FileText, History, LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "@/app/auth/actions";
@@ -126,6 +126,15 @@ export function UserMenu({ name, email, hasAvatar }: UserMenuProps) {
             >
               <FileText className="size-4 text-slate-500" />
               Changelog
+            </Link>
+            <Link
+              href="/history"
+              role="menuitem"
+              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              onClick={() => setOpen(false)}
+            >
+              <History className="size-4 text-slate-500" />
+              Change history
             </Link>
           </div>
           <div className="border-t border-slate-100 p-1.5">

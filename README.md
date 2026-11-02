@@ -2,7 +2,7 @@
 
 Web app for running the First Aid Post & Ambulance audit protocol: public landing, section forms, dashboard, action tracker, Excel/Word export, workbook import, and staff directories.
 
-**Version:** **1.0.2** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
+**Version:** **1.0.3** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
 
 **Production:** https://audit.mineaidhms.com (also https://fap-audit-app.vercel.app)
 
@@ -41,7 +41,7 @@ Web app for running the First Aid Post & Ambulance audit protocol: public landin
 | `main` | Production (Vercel production) |
 | `dev` | Local + Vercel preview |
 
-Migrations: `0000_init` … `0004_staff_on_duty` (people directories, profile, staff-on-duty rename). Apply with `npm run db:migrate` against the target `DATABASE_URL`.
+Migrations: `0000_init` … `0005_change_event` (people directories, profile, staff-on-duty rename, append-only change history). Apply with `npm run db:migrate` against the target `DATABASE_URL`.
 
 Neon Auth **trusted domains** on production must include every browser origin that serves the app (e.g. `https://fap-audit-app.vercel.app` and `https://audit.mineaidhms.com`). Missing origins show as “invalid origin”, not CORS.
 
@@ -58,9 +58,10 @@ CI runs lint, typecheck, and build. PRs into `main` must be **up to date with `m
 
 - [`docs/build-plan.md`](docs/build-plan.md) — phased build plan and current status
 - [`docs/git-workflow.md`](docs/git-workflow.md) — branching and merge rules
-- [`docs/dashboard-metrics.md`](docs/dashboard-metrics.md) — how dashboard compliance, risk, Major NCs, and themes are computed
+- [`docs/dashboard-metrics.md`](docs/dashboard-metrics.md) — dashboard metrics, findings lists, and change-history trail
 - [`CHANGELOG.md`](CHANGELOG.md) — release history
 - `/changelog` in the app — same changelog in the UI
+- `/history` in the app — append-only edit log (not in Excel/Word exports)
 
 ## Scripts
 

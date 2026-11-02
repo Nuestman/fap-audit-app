@@ -10,7 +10,7 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
 - [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Public landing at `/`; app home at `/audits`. Ongoing: phone/tablet smoke as needed.
 
-**App version:** **1.0.2** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
+**App version:** **1.0.3** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
 
 Deviations from the plan:
 
@@ -27,7 +27,7 @@ Deviations from the plan:
 
 ## Current state
 
-- Neon project **fap-audit** (`jolly-sun-18742594`, eu-west-2): branches **`main`** (production) and **`dev`** (local / Vercel preview). Drizzle migrations `0000`–`0004` applied on both (`user_profile`, `staff_on_duty`).
+- Neon project **fap-audit** (`jolly-sun-18742594`, eu-west-2): branches **`main`** (production) and **`dev`** (local / Vercel preview). Drizzle migrations `0000`–`0005` applied on both (`user_profile`, `staff_on_duty`, `change_event`).
 - App repo: https://github.com/Nuestman/fap-audit-app — GitHub **`main`** / **`development`**; production https://audit.mineaidhms.com (Vercel alias https://fap-audit-app.vercel.app).
 - Sibling source still useful: `fap-audit-report` (`protocol.md`, workbooks, `build_workbook.py`).
 - Directories in Settings: **Auditors** and **FAP staff** (table + modal CRUD); person pickers for lead/team/owners/staff on duty; `app_config.fap_staff_model` global vs site-assigned.
@@ -99,6 +99,7 @@ flowchart TD
 - **`good_practice`:** H2 entries.
 - **`table_entry`:** one row per post per supplementary table row, with the values stored as JSON.
 - **`corrective_action`:** linked to an `item_response` or `extra_finding`. Holds action text, owner, target date, priority, status (open, in progress or closed), close-out evidence and closed date. This table feeds I2 and the action tracker across audits.
+- **`change_event`:** append-only edit log (actor, entity, from/to JSON, source). Does not replace live row values; UI/reports still read current tables only.
 - **`attachment`:** photo or document metadata (storage key, file name, size, caption), linked to a response or finding.
 - **`sign_off`:** I4 entries (role, name, date).
 
@@ -137,6 +138,7 @@ flowchart TD
   - Buttons to export Excel and Word.
 - **`/settings`:** first aid posts; FAP staff model; auditors and FAP staff (table list + add/edit modal); protocol versions (read-only); allow-list display; about/version.
 - **`/changelog`:** rendered release notes from `CHANGELOG.md`.
+- **`/history`:** append-only **change history** for audit data edits (actor, from/to, source). Linked from the user-menu after Changelog. Per-item **Previous values** modal on criterion and H1/H3 cards when history exists. Migration `0005_change_event`.
 
 ## Folder structure
 
@@ -151,6 +153,7 @@ flowchart TD
   - `classification.ts`, holding the classification and risk types with an exhaustive switch
   - `metrics.ts`, for compliance and completion calculations
   - `themes.ts`, for cross-site detection
+  - `change-log.ts` / `change-log-types.ts`, append-only edit trail (`change_event`)
 - `src/app/(app)/...`: the protected pages listed above, with Server Actions in `actions.ts` next to each page.
 - `src/components/audit/`: `CriterionCard`, `SectionTabs`, `AutosaveField`, `PhotoUpload`, `SupplementaryTable`, `ClassificationSelect`.
 - `src/lib/export/excel.ts`, `src/lib/export/word-report.ts`, `src/lib/import/workbook.ts`.

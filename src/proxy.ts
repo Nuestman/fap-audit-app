@@ -10,6 +10,7 @@ export const config = {
     "/settings/:path*",
     "/profile/:path*",
     "/changelog/:path*",
+    "/history/:path*",
     "/api/attachments/:path*",
     "/api/audits/:path*",
     "/api/profile/:path*",

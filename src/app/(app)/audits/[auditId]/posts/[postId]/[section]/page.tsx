@@ -12,6 +12,7 @@ import { SectionChecklist } from "@/components/audit/section-checklist";
 import { SupplementaryTable } from "@/components/audit/supplementary-table";
 import { NavTabs } from "@/components/nav-tabs";
 import { ButtonLink, Card } from "@/components/ui";
+import { entitiesWithHistory } from "@/lib/audit/change-log";
 import { compareCodes, RISKS, riskLabel, riskTone, severityRank } from "@/lib/audit/classification";
 import { classificationCounts, riskCounts } from "@/lib/audit/metrics";
 import {
@@ -46,6 +47,16 @@ export default async function PostSectionPage({ params }: Props) {
   if (!ws) notFound();
   const staffForPost = filterStaffForSite(staff, post.siteId, config.fapStaffModel);
   const owners = asOwnerPeople(auditors, staffForPost);
+  const [responseHistory, extraHistory] = await Promise.all([
+    entitiesWithHistory(
+      "item_response",
+      ws.responses.map((r) => r.id),
+    ),
+    entitiesWithHistory(
+      "extra_finding",
+      ws.extras.map((e) => e.id),
+    ),
+  ]);
 
   const keys = ["details", ...protocol.sections.map((s) => s.code.toLowerCase()), "h", "i"];
   if (!keys.includes(section)) notFound();
@@ -130,6 +141,7 @@ export default async function PostSectionPage({ params }: Props) {
         originalNote: r?.originalNote ?? null,
         action: actionState(r?.actions[0]),
         attachments: r ? photosFor((a) => a.itemResponseId === r.id) : [],
+        hasHistory: r ? responseHistory.has(r.id) : false,
       };
     });
     const entryByRow = new Map(ws.entries.map((e) => [e.rowId, e.values]));
@@ -173,6 +185,7 @@ export default async function PostSectionPage({ params }: Props) {
           originalNote: e.originalNote,
           action: actionState(e.actions[0]) ?? { action: null, owner: null, targetDate: null, status: "open" },
           attachments: photosFor((a) => a.extraFindingId === e.id),
+          hasHistory: extraHistory.has(e.id),
         }));
     body = (
       <div className="space-y-6">

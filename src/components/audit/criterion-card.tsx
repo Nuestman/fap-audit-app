@@ -9,6 +9,7 @@ import { answerLabel } from "@/lib/audit/classification";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { cn } from "@/lib/utils";
 import { ActionFields, EMPTY_ACTION, type ActionState } from "./action-fields";
+import { ChangeHistoryButton } from "./change-history-button";
 import { ClassificationSelect } from "./classification-select";
 import type { PersonOption } from "./person-option";
 import { PhotoStrip, type AttachmentRef } from "./photo-strip";
@@ -26,6 +27,7 @@ export type CriterionData = {
   originalNote: string | null;
   action: ActionState | null;
   attachments: AttachmentRef[];
+  hasHistory?: boolean;
 };
 
 type State = {
@@ -62,6 +64,7 @@ export function CriterionCard({
     action: data.action ?? EMPTY_ACTION,
   });
   const [responseId, setResponseId] = useState(data.responseId);
+  const [hasHistory, setHasHistory] = useState(Boolean(data.hasHistory));
   const [showFinding, setShowFinding] = useState(
     Boolean(data.finding || data.classification || data.action?.action),
   );
@@ -70,6 +73,7 @@ export function CriterionCard({
   const persist = async (s: State) => {
     const res = await saveCriterion({ auditPostId, itemId: data.itemId, ...s });
     setResponseId(res.responseId);
+    if (res.changeLogged) setHasHistory(true);
     return res;
   };
   const { status, schedule } = useAutosave(persist);
@@ -101,7 +105,14 @@ export function CriterionCard({
         <div className="min-w-0 flex-1 space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p className="text-sm font-medium text-slate-900">{data.text}</p>
-            <SaveIndicator status={status} />
+            <div className="flex flex-wrap items-center gap-2">
+              <ChangeHistoryButton
+                entity="item_response"
+                entityId={responseId}
+                hasHistory={hasHistory}
+              />
+              <SaveIndicator status={status} />
+            </div>
           </div>
 
           {data.originalNote ? (

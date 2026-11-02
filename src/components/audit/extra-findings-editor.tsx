@@ -12,6 +12,7 @@ import { Button, Card, EmptyState, Field, Input, Textarea } from "@/components/u
 import type { Classification, ExtraKind } from "@/db/schema";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { ActionFields, EMPTY_ACTION } from "./action-fields";
+import { ChangeHistoryButton } from "./change-history-button";
 import { ClassificationSelect } from "./classification-select";
 import type { PersonOption } from "./person-option";
 import { PhotoStrip, type AttachmentRef } from "./photo-strip";
@@ -22,6 +23,7 @@ export type ExtraFindingData = ExtraInput & {
   kind: ExtraKind;
   originalNote: string | null;
   attachments: AttachmentRef[];
+  hasHistory?: boolean;
 };
 
 function ExtraCard({
@@ -46,7 +48,11 @@ function ExtraCard({
     classification: data.classification,
     action: data.action ?? EMPTY_ACTION,
   });
-  const { status, schedule } = useAutosave((d: ExtraInput) => saveExtraFinding(data.id, d));
+  const [hasHistory, setHasHistory] = useState(Boolean(data.hasHistory));
+  const { status, schedule } = useAutosave(async (d: ExtraInput) => {
+    const res = await saveExtraFinding(data.id, d);
+    if (res.changeLogged) setHasHistory(true);
+  });
 
   function set(patch: Partial<ExtraInput>, immediate = false) {
     const next = { ...v, ...patch };
@@ -63,6 +69,11 @@ function ExtraCard({
           {isH1 ? "H1" : "H3"} item {index + 1}
         </span>
         <div className="flex items-center gap-2">
+          <ChangeHistoryButton
+            entity="extra_finding"
+            entityId={data.id}
+            hasHistory={hasHistory}
+          />
           <SaveIndicator status={status} />
           <button
             type="button"
