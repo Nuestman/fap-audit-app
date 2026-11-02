@@ -36,6 +36,13 @@
       "when": 1793378600000,
       "tag": "0004_staff_on_duty",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793450000000,
+      "tag": "0005_change_event",
+      "breakpoints": true
     }
   ]
 }

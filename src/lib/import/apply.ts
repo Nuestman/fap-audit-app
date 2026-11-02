@@ -3,6 +3,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { upsertFirstAction } from "@/lib/audit/action-mutations";
+import { auditIdForPost, diffChanges, recordChange } from "@/lib/audit/change-log";
 import { getPostWorkspace, type AuditWithPosts, type Protocol } from "@/lib/audit/queries";
 import type { ParsedAction, ParsedPost } from "./workbook";
 
@@ -54,6 +55,9 @@ async function applyPost(auditPostId: number, protocol: Protocol, parsed: Parsed
     signOffs: 0,
   };
 
+  const auditId = await auditIdForPost(auditPostId);
+  const changeCtx = { auditId, auditPostId, source: "import" as const };
+
   // ---- criteria
   const itemIdByCode = new Map(protocol.sections.flatMap((sec) => sec.items.map((i) => [i.code, i.id])));
   const responseByItem = new Map(ws.responses.map((r) => [r.itemId, r]));
@@ -77,8 +81,37 @@ async function applyPost(auditPostId: number, protocol: Protocol, parsed: Parsed
         set: { ...values, updatedAt: new Date() },
       })
       .returning({ id: s.itemResponse.id });
+    await recordChange({
+      actor: user,
+      entity: "item_response",
+      entityId: row.id,
+      action: existing ? "update" : "insert",
+      changes: diffChanges(
+        existing
+          ? {
+              answer: existing.answer,
+              evidence: existing.evidence,
+              finding: existing.finding,
+              classification: existing.classification,
+            }
+          : null,
+        {
+          answer: values.answer,
+          evidence: values.evidence,
+          finding: values.finding,
+          classification: values.classification,
+        },
+        ["answer", "evidence", "finding", "classification"],
+      ),
+      ...changeCtx,
+    });
     if (actionFilled(c.action)) {
-      await upsertFirstAction({ itemResponseId: row.id }, mergeAction(c.action, existing?.actions[0]), user);
+      await upsertFirstAction(
+        { itemResponseId: row.id },
+        mergeAction(c.action, existing?.actions[0]),
+        user,
+        changeCtx,
+      );
     }
     summary.criteria++;
   }
@@ -100,6 +133,21 @@ async function applyPost(auditPostId: number, protocol: Protocol, parsed: Parsed
       await db.update(s.extraFinding).set(values).where(eq(s.extraFinding.id, existing.id));
       extraId = existing.id;
       summary.extrasUpdated++;
+      await recordChange({
+        actor: user,
+        entity: "extra_finding",
+        entityId: extraId,
+        action: "update",
+        changes: diffChanges(existing, values, [
+          "finding",
+          "linkedRef",
+          "evidence",
+          "consequence",
+          "interimControl",
+          "classification",
+        ]),
+        ...changeCtx,
+      });
     } else {
       const [created] = await db
         .insert(s.extraFinding)
@@ -113,9 +161,29 @@ async function applyPost(auditPostId: number, protocol: Protocol, parsed: Parsed
         .returning({ id: s.extraFinding.id });
       extraId = created.id;
       summary.extrasAdded++;
+      await recordChange({
+        actor: user,
+        entity: "extra_finding",
+        entityId: extraId,
+        action: "insert",
+        changes: diffChanges(null, values, [
+          "finding",
+          "linkedRef",
+          "evidence",
+          "consequence",
+          "interimControl",
+          "classification",
+        ]),
+        ...changeCtx,
+      });
     }
     if (actionFilled(e.action)) {
-      await upsertFirstAction({ extraFindingId: extraId }, mergeAction(e.action, existing?.actions[0]), user);
+      await upsertFirstAction(
+        { extraFindingId: extraId },
+        mergeAction(e.action, existing?.actions[0]),
+        user,
+        changeCtx,
+      );
     }
   }
 

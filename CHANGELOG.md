@@ -3,6 +3,16 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.3] — 2026-10-31
+
+### Added
+- Append-only **change history** (`change_event` / migration `0005`): every persisted edit to checklist responses, H1/H3, corrective actions, post details/conclusion, good practices, and table entries is logged with actor, from/to field values, and source (`ui` / `import`).
+- System **Change history** page at `/history` (user-menu link after Changelog), filterable by entity and actor. Not included in Excel/Word exports.
+- Per-item **Previous values** control on criterion and H1/H3 cards when history exists (modal, not tooltip).
+
+### Docs
+- README / build-plan / dashboard-metrics updated for `/history`, `0005_change_event`, and how the trail relates to live metrics.
+
 ## [1.0.2] — 2026-10-31
 
 ### Added
@@ -94,6 +104,7 @@ First production release for live FAP / ambulance audits on `audit.mineaidhms.co
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.3]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Nuestman/fap-audit-app/compare/v0.3.2...v1.0.0

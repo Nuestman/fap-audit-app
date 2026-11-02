@@ -5,6 +5,13 @@ import { z } from "zod";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth/session";
 import { ActionInput, upsertFirstAction } from "@/lib/audit/action-mutations";
+import {
+  auditIdForPost,
+  diffChanges,
+  listEntityHistory,
+  recordChange,
+} from "@/lib/audit/change-log";
+import type { ChangeEntity } from "@/lib/audit/change-log-types";
 
 const s = schema;
 const id = z.number().int().positive();
@@ -17,6 +24,19 @@ const isoDate = z
 const classification = z.enum(s.classificationEnum.enumValues).nullable();
 
 const clean = (v: string | null) => (v && v.trim() ? v : null);
+
+const CRITERION_FIELDS = ["answer", "evidence", "finding", "classification"] as const;
+const EXTRA_FIELDS = [
+  "finding",
+  "linkedRef",
+  "evidence",
+  "consequence",
+  "interimControl",
+  "classification",
+] as const;
+const POST_DETAIL_FIELDS = ["auditDate", "shift", "staffOnDuty", "ambulanceUnits"] as const;
+const CONCLUSION_FIELDS = ["overallStatus", "keyStrengths", "keyRisks", "recommendation"] as const;
+const PRACTICE_FIELDS = ["practice", "evidence", "value", "replication"] as const;
 
 // ---------------------------------------------------------------- criteria
 
@@ -31,9 +51,16 @@ const CriterionInput = z.object({
 });
 export type CriterionInput = z.infer<typeof CriterionInput>;
 
-export async function saveCriterion(input: CriterionInput): Promise<{ responseId: number }> {
+export async function saveCriterion(
+  input: CriterionInput,
+): Promise<{ responseId: number; changeLogged: boolean }> {
   const user = await requireUser();
   const d = CriterionInput.parse(input);
+  const [before] = await db
+    .select()
+    .from(s.itemResponse)
+    .where(and(eq(s.itemResponse.auditPostId, d.auditPostId), eq(s.itemResponse.itemId, d.itemId)))
+    .limit(1);
   const values = {
     answer: d.answer,
     evidence: clean(d.evidence),
@@ -49,8 +76,27 @@ export async function saveCriterion(input: CriterionInput): Promise<{ responseId
       set: { ...values, updatedAt: new Date() },
     })
     .returning({ id: s.itemResponse.id });
-  await upsertFirstAction({ itemResponseId: row.id }, d.action, user.email);
-  return { responseId: row.id };
+
+  const changes = diffChanges(
+    before ?? null,
+    { answer: values.answer, evidence: values.evidence, finding: values.finding, classification: values.classification },
+    [...CRITERION_FIELDS],
+  );
+  const auditId = await auditIdForPost(d.auditPostId);
+  const changeLogged = await recordChange({
+    actor: user.email,
+    entity: "item_response",
+    entityId: row.id,
+    action: before ? "update" : "insert",
+    changes,
+    auditId,
+    auditPostId: d.auditPostId,
+  });
+  await upsertFirstAction({ itemResponseId: row.id }, d.action, user.email, {
+    auditId,
+    auditPostId: d.auditPostId,
+  });
+  return { responseId: row.id, changeLogged };
 }
 
 // ---------------------------------------------------------------- post details and conclusion
@@ -63,17 +109,28 @@ const DetailsInput = z.object({
 });
 
 export async function savePostDetails(auditPostId: number, input: z.infer<typeof DetailsInput>) {
-  await requireUser();
+  const user = await requireUser();
   const d = DetailsInput.parse(input);
-  await db
-    .update(s.auditPost)
-    .set({
-      auditDate: d.auditDate,
-      shift: clean(d.shift),
-      staffOnDuty: clean(d.staffOnDuty),
-      ambulanceUnits: clean(d.ambulanceUnits),
-    })
-    .where(eq(s.auditPost.id, id.parse(auditPostId)));
+  const postId = id.parse(auditPostId);
+  const [before] = await db.select().from(s.auditPost).where(eq(s.auditPost.id, postId)).limit(1);
+  const next = {
+    auditDate: d.auditDate,
+    shift: clean(d.shift),
+    staffOnDuty: clean(d.staffOnDuty),
+    ambulanceUnits: clean(d.ambulanceUnits),
+  };
+  await db.update(s.auditPost).set(next).where(eq(s.auditPost.id, postId));
+  if (before) {
+    await recordChange({
+      actor: user.email,
+      entity: "audit_post",
+      entityId: postId,
+      action: "update",
+      changes: diffChanges(before, next, [...POST_DETAIL_FIELDS]),
+      auditId: before.auditId,
+      auditPostId: postId,
+    });
+  }
 }
 
 const ConclusionInput = z.object({
@@ -87,17 +144,28 @@ export async function saveConclusion(
   auditPostId: number,
   input: z.infer<typeof ConclusionInput>,
 ) {
-  await requireUser();
+  const user = await requireUser();
   const d = ConclusionInput.parse(input);
-  await db
-    .update(s.auditPost)
-    .set({
-      overallStatus: d.overallStatus,
-      keyStrengths: clean(d.keyStrengths),
-      keyRisks: clean(d.keyRisks),
-      recommendation: clean(d.recommendation),
-    })
-    .where(eq(s.auditPost.id, id.parse(auditPostId)));
+  const postId = id.parse(auditPostId);
+  const [before] = await db.select().from(s.auditPost).where(eq(s.auditPost.id, postId)).limit(1);
+  const next = {
+    overallStatus: d.overallStatus,
+    keyStrengths: clean(d.keyStrengths),
+    keyRisks: clean(d.keyRisks),
+    recommendation: clean(d.recommendation),
+  };
+  await db.update(s.auditPost).set(next).where(eq(s.auditPost.id, postId));
+  if (before) {
+    await recordChange({
+      actor: user.email,
+      entity: "audit_post",
+      entityId: postId,
+      action: "update",
+      changes: diffChanges(before, next, [...CONCLUSION_FIELDS]),
+      auditId: before.auditId,
+      auditPostId: postId,
+    });
+  }
 }
 
 // ---------------------------------------------------------------- supplementary tables
@@ -107,15 +175,37 @@ export async function saveTableEntry(
   rowId: number,
   values: Record<string, string>,
 ) {
-  await requireUser();
+  const user = await requireUser();
+  const postId = id.parse(auditPostId);
+  const rid = id.parse(rowId);
   const v = z.record(z.string(), z.string().max(2000)).parse(values);
-  await db
+  const [before] = await db
+    .select()
+    .from(s.tableEntry)
+    .where(and(eq(s.tableEntry.auditPostId, postId), eq(s.tableEntry.rowId, rid)))
+    .limit(1);
+  const [row] = await db
     .insert(s.tableEntry)
-    .values({ auditPostId: id.parse(auditPostId), rowId: id.parse(rowId), values: v })
+    .values({ auditPostId: postId, rowId: rid, values: v })
     .onConflictDoUpdate({
       target: [s.tableEntry.auditPostId, s.tableEntry.rowId],
       set: { values: v, updatedAt: new Date() },
-    });
+    })
+    .returning({ id: s.tableEntry.id });
+  const changes = diffChanges(
+    before ? { values: before.values } : null,
+    { values: v },
+    ["values"],
+  );
+  await recordChange({
+    actor: user.email,
+    entity: "table_entry",
+    entityId: row.id,
+    action: before ? "update" : "insert",
+    changes,
+    auditId: await auditIdForPost(postId),
+    auditPostId: postId,
+  });
 }
 
 // ---------------------------------------------------------------- H1 / H3
@@ -145,28 +235,62 @@ const ExtraInput = z.object({
 });
 export type ExtraInput = z.infer<typeof ExtraInput>;
 
-export async function saveExtraFinding(extraId: number, input: ExtraInput) {
+export async function saveExtraFinding(
+  extraId: number,
+  input: ExtraInput,
+): Promise<{ changeLogged: boolean }> {
   const user = await requireUser();
   const d = ExtraInput.parse(input);
   const fid = id.parse(extraId);
-  await db
-    .update(s.extraFinding)
-    .set({
-      finding: clean(d.finding),
-      linkedRef: clean(d.linkedRef),
-      evidence: clean(d.evidence),
-      consequence: clean(d.consequence),
-      interimControl: clean(d.interimControl),
-      classification: d.classification,
-      updatedBy: user.email,
-    })
-    .where(eq(s.extraFinding.id, fid));
-  await upsertFirstAction({ extraFindingId: fid }, d.action, user.email);
+  const [before] = await db.select().from(s.extraFinding).where(eq(s.extraFinding.id, fid)).limit(1);
+  const next = {
+    finding: clean(d.finding),
+    linkedRef: clean(d.linkedRef),
+    evidence: clean(d.evidence),
+    consequence: clean(d.consequence),
+    interimControl: clean(d.interimControl),
+    classification: d.classification,
+    updatedBy: user.email,
+  };
+  await db.update(s.extraFinding).set(next).where(eq(s.extraFinding.id, fid));
+  let changeLogged = false;
+  if (before) {
+    const auditId = await auditIdForPost(before.auditPostId);
+    changeLogged = await recordChange({
+      actor: user.email,
+      entity: "extra_finding",
+      entityId: fid,
+      action: "update",
+      changes: diffChanges(before, next, [...EXTRA_FIELDS]),
+      auditId,
+      auditPostId: before.auditPostId,
+    });
+    await upsertFirstAction({ extraFindingId: fid }, d.action, user.email, {
+      auditId,
+      auditPostId: before.auditPostId,
+    });
+  } else {
+    await upsertFirstAction({ extraFindingId: fid }, d.action, user.email);
+  }
+  return { changeLogged };
 }
 
 export async function deleteExtraFinding(extraId: number) {
-  await requireUser();
-  await db.delete(s.extraFinding).where(eq(s.extraFinding.id, id.parse(extraId)));
+  const user = await requireUser();
+  const fid = id.parse(extraId);
+  const [before] = await db.select().from(s.extraFinding).where(eq(s.extraFinding.id, fid)).limit(1);
+  await db.delete(s.extraFinding).where(eq(s.extraFinding.id, fid));
+  if (before) {
+    await recordChange({
+      actor: user.email,
+      entity: "extra_finding",
+      entityId: fid,
+      action: "delete",
+      changes: diffChanges(before, null, [...EXTRA_FIELDS]),
+      auditId: await auditIdForPost(before.auditPostId),
+      auditPostId: before.auditPostId,
+    });
+  }
 }
 
 // ---------------------------------------------------------------- H2 good practices
@@ -188,32 +312,90 @@ export async function createGoodPractice(auditPostId: number) {
 const PracticeInput = z.object({ practice: text, evidence: text, value: text, replication: text });
 
 export async function saveGoodPractice(practiceId: number, input: z.infer<typeof PracticeInput>) {
-  await requireUser();
+  const user = await requireUser();
   const d = PracticeInput.parse(input);
-  await db
-    .update(s.goodPractice)
-    .set({
-      practice: clean(d.practice),
-      evidence: clean(d.evidence),
-      value: clean(d.value),
-      replication: clean(d.replication),
-    })
-    .where(eq(s.goodPractice.id, id.parse(practiceId)));
+  const pid = id.parse(practiceId);
+  const [before] = await db.select().from(s.goodPractice).where(eq(s.goodPractice.id, pid)).limit(1);
+  const next = {
+    practice: clean(d.practice),
+    evidence: clean(d.evidence),
+    value: clean(d.value),
+    replication: clean(d.replication),
+  };
+  await db.update(s.goodPractice).set(next).where(eq(s.goodPractice.id, pid));
+  if (before) {
+    await recordChange({
+      actor: user.email,
+      entity: "good_practice",
+      entityId: pid,
+      action: "update",
+      changes: diffChanges(before, next, [...PRACTICE_FIELDS]),
+      auditId: await auditIdForPost(before.auditPostId),
+      auditPostId: before.auditPostId,
+    });
+  }
 }
 
 export async function deleteGoodPractice(practiceId: number) {
-  await requireUser();
-  await db.delete(s.goodPractice).where(eq(s.goodPractice.id, id.parse(practiceId)));
+  const user = await requireUser();
+  const pid = id.parse(practiceId);
+  const [before] = await db.select().from(s.goodPractice).where(eq(s.goodPractice.id, pid)).limit(1);
+  await db.delete(s.goodPractice).where(eq(s.goodPractice.id, pid));
+  if (before) {
+    await recordChange({
+      actor: user.email,
+      entity: "good_practice",
+      entityId: pid,
+      action: "delete",
+      changes: diffChanges(before, null, [...PRACTICE_FIELDS]),
+      auditId: await auditIdForPost(before.auditPostId),
+      auditPostId: before.auditPostId,
+    });
+  }
 }
 
 // ---------------------------------------------------------------- I2 / I4
 
 export async function saveActionPriority(actionId: number, priority: number | null) {
-  await requireUser();
+  const user = await requireUser();
+  const aid = id.parse(actionId);
+  const [before] = await db
+    .select()
+    .from(s.correctiveAction)
+    .where(eq(s.correctiveAction.id, aid))
+    .limit(1);
+  const nextPriority = z.number().int().min(1).max(99).nullable().parse(priority);
   await db
     .update(s.correctiveAction)
-    .set({ priority: z.number().int().min(1).max(99).nullable().parse(priority) })
-    .where(eq(s.correctiveAction.id, id.parse(actionId)));
+    .set({ priority: nextPriority })
+    .where(eq(s.correctiveAction.id, aid));
+  if (before) {
+    let auditPostId: number | null = null;
+    if (before.itemResponseId) {
+      const [r] = await db
+        .select({ auditPostId: s.itemResponse.auditPostId })
+        .from(s.itemResponse)
+        .where(eq(s.itemResponse.id, before.itemResponseId))
+        .limit(1);
+      auditPostId = r?.auditPostId ?? null;
+    } else if (before.extraFindingId) {
+      const [r] = await db
+        .select({ auditPostId: s.extraFinding.auditPostId })
+        .from(s.extraFinding)
+        .where(eq(s.extraFinding.id, before.extraFindingId))
+        .limit(1);
+      auditPostId = r?.auditPostId ?? null;
+    }
+    await recordChange({
+      actor: user.email,
+      entity: "corrective_action",
+      entityId: aid,
+      action: "update",
+      changes: diffChanges({ priority: before.priority }, { priority: nextPriority }, ["priority"]),
+      auditId: auditPostId ? await auditIdForPost(auditPostId) : null,
+      auditPostId,
+    });
+  }
 }
 
 export async function saveSignOff(
@@ -226,4 +408,10 @@ export async function saveSignOff(
     .update(s.signOff)
     .set({ name: clean(d.name), signedDate: d.signedDate })
     .where(eq(s.signOff.id, id.parse(signOffId)));
+}
+
+/** Load change history for one entity (used by the per-item history modal). */
+export async function fetchEntityHistory(entity: ChangeEntity, entityId: number) {
+  await requireUser();
+  return listEntityHistory(entity, id.parse(entityId));
 }

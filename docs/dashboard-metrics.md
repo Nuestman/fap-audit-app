@@ -151,6 +151,20 @@ If the dashboard shows three themes, that means exactly three criterion codes cu
 
 ---
 
+## Change history (system audit trail)
+
+Edits are logged in `change_event` (append-only). Live forms/reports still show **current** values only.
+
+| Piece | Role |
+|-------|------|
+| `/history` | System-wide log (user menu → Change history) |
+| **Previous values** on criterion / H1/H3 cards | Modal when that item already has history |
+| Sources | `ui` (autosave), `import` (workbook upload) |
+
+Not exported to Excel/Word. See migration `0005_change_event` and `src/lib/audit/change-log.ts`.
+
+---
+
 ## H1 linked criterion / reference
 
 H1 rows store an optional free-text **Linked criterion / reference** (`extra_finding.linked_ref`). It is typed on the Section H card (not a foreign key to `protocol_item`). Use it for an ISO clause or a “related to …” criterion note when the finding has no exact checklist home. Excel/Word H1 columns show the same text.
