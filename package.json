@@ -1,6 +1,6 @@
 {
   "name": "fap-audit-app",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -49,6 +49,7 @@
     "@better-auth/drizzle-adapter": "^1.7.14",
     "uuid": "^11.1.1",
     "esbuild": "^0.25.0",
-    "@react-email/render": "^2.2.0"
+    "@react-email/render": "^2.2.0",
+    "minimatch": "^11.0.1"
   }
 }

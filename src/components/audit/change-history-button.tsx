@@ -1,7 +1,7 @@
 "use client";
 
 import { History, X } from "lucide-react";
-import { useEffect, useId, useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { fetchEntityHistory } from "@/app/(app)/audits/[auditId]/posts/[postId]/actions";
 import type { ChangeEntity } from "@/lib/audit/change-log-types";
 
@@ -28,7 +28,7 @@ function formatWhen(d: Date | string) {
 export function ChangeHistoryButton({
   entity,
   entityId,
-  hasHistory: initialHasHistory,
+  hasHistory,
   label = "Previous values",
 }: {
   entity: ChangeEntity;
@@ -37,16 +37,14 @@ export function ChangeHistoryButton({
   label?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [hasHistory, setHasHistory] = useState(initialHasHistory);
+  /** Hide after a fetch proves there is nothing (avoids syncing prop via useEffect). */
+  const [confirmedEmpty, setConfirmedEmpty] = useState(false);
   const [rows, setRows] = useState<EventRow[] | null>(null);
   const [pending, startTransition] = useTransition();
   const titleId = useId();
 
-  useEffect(() => {
-    setHasHistory(initialHasHistory);
-  }, [initialHasHistory]);
-
-  if (!entityId || !hasHistory) return null;
+  const show = Boolean(entityId && hasHistory && !confirmedEmpty);
+  if (!show) return null;
 
   function openModal() {
     setOpen(true);
@@ -54,7 +52,7 @@ export function ChangeHistoryButton({
     startTransition(async () => {
       const data = await fetchEntityHistory(entity, entityId!);
       setRows(data);
-      if (data.length === 0) setHasHistory(false);
+      if (data.length === 0) setConfirmedEmpty(true);
     });
   }
 

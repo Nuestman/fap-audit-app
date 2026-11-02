@@ -10,7 +10,7 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
 - [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Public landing at `/`; app home at `/audits`. Ongoing: phone/tablet smoke as needed.
 
-**App version:** **1.0.3** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
+**App version:** **1.0.4** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
 
 Deviations from the plan:
 
