@@ -3,6 +3,15 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.5] — 2026-11-04
+
+### Changed
+- Replaced native browser `confirm()` dialogs with on-brand **Confirm** / **Dialog** UI (`ConfirmProvider`, `useConfirm`) for delete/remove flows (extra findings, good practices, photos, profile avatar).
+- Shared `Dialog` now backs Settings people editors and the **Previous values** history modal (same look as confirms).
+
+### Docs
+- Build plan notes UI primitives under `src/components/ui/` (button, dialog, confirm) instead of a single barrel file only.
+
 ## [1.0.4] — 2026-11-02
 
 ### Fixed
@@ -110,6 +119,7 @@ First production release for live FAP / ambulance audits on `audit.mineaidhms.co
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.5]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.1...v1.0.2

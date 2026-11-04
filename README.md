@@ -2,7 +2,7 @@
 
 Web app for running the First Aid Post & Ambulance audit protocol: public landing, section forms, dashboard, action tracker, Excel/Word export, workbook import, and staff directories.
 
-**Version:** **1.0.4** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
+**Version:** **1.0.5** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
 
 **Production:** https://audit.mineaidhms.com (also https://fap-audit-app.vercel.app)
 

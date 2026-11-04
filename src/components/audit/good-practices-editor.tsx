@@ -8,6 +8,7 @@ import {
   saveGoodPractice,
 } from "@/app/(app)/audits/[auditId]/posts/[postId]/actions";
 import { Button, Card, EmptyState, Field, Textarea } from "@/components/ui";
+import { useConfirm } from "@/components/ui/confirm";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { SaveIndicator } from "./save-indicator";
 
@@ -65,6 +66,7 @@ function PracticeCard({ data, index, onDelete }: { data: Practice; index: number
 
 export function GoodPracticesEditor({ auditPostId, initial }: { auditPostId: number; initial: Practice[] }) {
   const [items, setItems] = useState(initial);
+  const confirm = useConfirm();
 
   async function add() {
     const row = await createGoodPractice(auditPostId);
@@ -72,7 +74,13 @@ export function GoodPracticesEditor({ auditPostId, initial }: { auditPostId: num
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this good practice?")) return;
+    const ok = await confirm({
+      title: "Delete this good practice?",
+      description: "This cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+    if (!ok) return;
     await deleteGoodPractice(id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   }

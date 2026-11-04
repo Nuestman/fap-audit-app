@@ -2,6 +2,7 @@
 
 import { Camera, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { useConfirm } from "@/components/ui/confirm";
 
 export type AttachmentRef = { id: number; fileName: string };
 
@@ -36,6 +37,7 @@ export function PhotoStrip({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const confirm = useConfirm();
 
   async function upload(files: FileList | null) {
     if (!files?.length) return;
@@ -64,7 +66,13 @@ export function PhotoStrip({
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this photo?")) return;
+    const ok = await confirm({
+      title: "Delete this photo?",
+      description: "This cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+    if (!ok) return;
     const res = await fetch(`/api/attachments/${id}`, { method: "DELETE" });
     if (res.ok) setPhotos((p) => p.filter((x) => x.id !== id));
   }
