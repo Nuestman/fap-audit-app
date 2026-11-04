@@ -4,6 +4,7 @@ import { Camera, Loader2, Trash2 } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Field, Input } from "@/components/ui";
+import { useConfirm } from "@/components/ui/confirm";
 import { saveProfile, type ProfileFormState } from "./actions";
 
 const MAX_EDGE = 512;
@@ -32,6 +33,7 @@ type Props = {
 
 export function ProfileForm({ name, email, jobTitle, organisation, phone, hasAvatar }: Props) {
   const router = useRouter();
+  const confirm = useConfirm();
   const inputRef = useRef<HTMLInputElement>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -70,7 +72,13 @@ export function ProfileForm({ name, email, jobTitle, organisation, phone, hasAva
   }
 
   async function removeAvatar() {
-    if (!confirm("Remove your profile picture?")) return;
+    const ok = await confirm({
+      title: "Remove your profile picture?",
+      description: "You can upload a new one afterwards.",
+      confirmLabel: "Remove",
+      danger: true,
+    });
+    if (!ok) return;
     setAvatarBusy(true);
     setAvatarError(null);
     try {

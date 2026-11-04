@@ -9,6 +9,7 @@ import {
   type ExtraInput,
 } from "@/app/(app)/audits/[auditId]/posts/[postId]/actions";
 import { Button, Card, EmptyState, Field, Input, Textarea } from "@/components/ui";
+import { useConfirm } from "@/components/ui/confirm";
 import type { Classification, ExtraKind } from "@/db/schema";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { ActionFields, EMPTY_ACTION } from "./action-fields";
@@ -155,6 +156,7 @@ export function ExtraFindingsEditor({
 }) {
   const [items, setItems] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const confirm = useConfirm();
 
   async function add() {
     setBusy(true);
@@ -170,7 +172,13 @@ export function ExtraFindingsEditor({
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this item and its action?")) return;
+    const ok = await confirm({
+      title: "Delete this item?",
+      description: "This also removes its corrective action. This cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+    if (!ok) return;
     await deleteExtraFinding(id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
