@@ -2,7 +2,7 @@
 
 Web app for running the First Aid Post & Ambulance audit protocol: public landing, section forms, dashboard, action tracker, Excel/Word export, workbook import, and staff directories.
 
-**Version:** **1.0.5** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
+**Version:** **1.0.6** — see the app footer, [`package.json`](package.json), and [`CHANGELOG.md`](CHANGELOG.md).
 
 **Production:** https://audit.mineaidhms.com (also https://fap-audit-app.vercel.app)
 
@@ -79,3 +79,5 @@ Workbook import (dry-run by default; add `--apply` to write):
 ```bash
 npx tsx --conditions=react-server --env-file=.env.local ./scripts/import-workbook.ts <auditId> "<path.xlsx>"
 ```
+
+Offline Excel template / protocol builder (blank v1, no note-seeded drafts): see [`tools/workbook/`](tools/workbook/). Live reports still come from app Excel/Word export.

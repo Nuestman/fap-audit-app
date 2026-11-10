@@ -51,8 +51,9 @@ export function ActionRow({
         <RiskBadge classification={action.classification} />
         {overdue ? <Badge className="bg-red-50 text-red-700 ring-red-200">Overdue</Badge> : null}
         {action.closedAt ? <span className="text-slate-500">Closed {formatDate(action.closedAt)}</span> : null}
-        <span className="ml-auto text-slate-400">{action.auditTitle}</span>
-        <SaveIndicator status={status} />
+        <span className="ml-auto">
+          <SaveIndicator status={status} />
+        </span>
       </div>
       {action.finding ? <p className="text-sm text-slate-700">{action.finding}</p> : null}
       <ActionFields

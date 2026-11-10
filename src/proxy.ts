@@ -6,6 +6,7 @@ export default auth.middleware({ loginUrl: "/auth/sign-in" });
 export const config = {
   matcher: [
     "/audits/:path*",
+    "/actions",
     "/actions/:path*",
     "/settings/:path*",
     "/profile/:path*",

@@ -175,13 +175,14 @@ H1 rows store an optional free-text **Linked criterion / reference** (`extra_fin
 
 | Topic | Where it lives |
 |-------|----------------|
-| Action tracker (owners, due dates, close-out) | `/actions` |
+| Action tracker (owners, due dates, close-out) | `/audits/[auditId]/actions` |
 | Per-post I2 priority action plan | Post section I / Excel post sheet |
-| Excel **Actions** sheet | Export-time flatten of findings that have an action (not Excel formulas into post sheets) |
+| Excel **Findings** sheet | Side-by-side matrix (checklist + H1/H2/H3), formula-linked to post sheets |
+| Excel **Actions** sheet | Export-time flatten of findings that have an action |
 | Good-practice counts | Included in post summaries / Excel summary; not a dedicated dashboard panel |
 
 ---
 
 ## Same formulas elsewhere
 
-Excel Summary and the Word draft report reuse the same compliance, classification, risk, Major NC, and cross-site theme logic so dashboard and exports stay aligned.
+Excel Summary and the Word draft report reuse the same compliance, classification, risk, Major NC, and cross-site theme logic so dashboard and exports stay aligned. The Excel **Findings** sheet uses live formulas into each post sheet for side-by-side comparison and Cross-site helpers.

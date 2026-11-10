@@ -10,7 +10,7 @@ A hosted web app that runs the First Aid Post and Ambulance audit protocol as se
 - [x] Phase 4: Exports and import (Excel export, Word report draft, Excel workbook import)
 - [x] Phase 5: Deploy (Vercel project linked to GitHub, Neon `main` for production / `dev` for local+preview, trusted domain, env vars). Public landing at `/`; app home at `/audits`. Ongoing: phone/tablet smoke as needed.
 
-**App version:** **1.0.5** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
+**App version:** **1.0.6** (`package.json` / `src/lib/version.ts` / `CHANGELOG.md`). Production URL: https://audit.mineaidhms.com.
 
 Deviations from the plan:
 
@@ -29,10 +29,11 @@ Deviations from the plan:
 
 - Neon project **fap-audit** (`jolly-sun-18742594`, eu-west-2): branches **`main`** (production) and **`dev`** (local / Vercel preview). Drizzle migrations `0000`–`0005` applied on both (`user_profile`, `staff_on_duty`, `change_event`).
 - App repo: https://github.com/Nuestman/fap-audit-app — GitHub **`main`** / **`development`**; production https://audit.mineaidhms.com (Vercel alias https://fap-audit-app.vercel.app).
-- Sibling source still useful: `fap-audit-report` (`protocol.md`, workbooks, `build_workbook.py` — template includes a formula-linked **Actions** sheet that reads corrective actions from each post sheet).
+- Curated offline workbook tools in-repo: [`tools/workbook/`](../tools/workbook/) (`protocol.md`, `build_workbook.py --empty` → blank **FAP Audit Workbook v1.xlsx**, formula-linked Findings/Actions). Sibling `fap-audit-report` remains optional for filled drafts / ops; do not commit filled workbooks.
 - Directories in Settings: **Auditors** and **FAP staff** (table + dialog CRUD); person pickers for lead/team/owners/staff on duty; `app_config.fap_staff_model` global vs site-assigned.
 - Root `Providers` wraps the app with `ConfirmProvider` for on-brand confirm dialogs (no native `alert` / `confirm` / `prompt`).
-- Public landing at `/`; authenticated shell at `/audits` with profile + user badge.
+- Audit chrome: sticky tab bars only (audit-level and post section tabs); titles/breadcrumbs scroll away. Actions live under each audit after Findings.
+- Public landing at `/`; authenticated shell at `/audits` with profile + user badge (global nav is Audits + Settings).
 
 ## Technology
 
@@ -132,7 +133,7 @@ flowchart TD
   - Cross-site themes: criteria answered No at two or more posts, flagged as possibly systemic.
   - Metric definitions: see [`dashboard-metrics.md`](dashboard-metrics.md).
 - **`/audits/[auditId]/findings`:** all findings across posts, filterable by post, classification, risk, and source.
-- **`/actions`:** the action tracker across all audits. Filter by post, owner, status and overdue; close an action with close-out evidence; owner uses the person picker.
+- **`/audits/[auditId]/actions`:** corrective-action tracker for that audit (tab after Findings). Filter by post, owner, status and overdue; close an action with close-out evidence; owner uses the person picker. Legacy `/actions` redirects to the latest audit.
 - **`/audits/[auditId]/report`:**
   - Edit the narrative fields.
   - Preview the auto-generated sections.
@@ -158,7 +159,7 @@ flowchart TD
 - `src/app/(app)/...`: the protected pages listed above, with Server Actions in `actions.ts` next to each page.
 - `src/components/audit/`: `CriterionCard`, `SectionTabs`, `AutosaveField`, `PhotoUpload`, `SupplementaryTable`, `ClassificationSelect`.
 - `src/components/ui/`: shared form controls; `dialog.tsx` / `confirm.tsx` for on-brand modals; `src/components/providers.tsx` mounts `ConfirmProvider`.
-- `src/lib/export/excel.ts`, `src/lib/export/word-report.ts`, `src/lib/import/workbook.ts`.
+- `src/lib/export/excel.ts` (includes formula-linked **Findings** + **Actions** sheets), `src/lib/export/word-report.ts`, `src/lib/import/workbook.ts`.
 
 ## Phases (each ends with a review before the next starts)
 

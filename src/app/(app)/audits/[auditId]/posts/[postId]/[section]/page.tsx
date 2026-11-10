@@ -297,11 +297,11 @@ export default async function PostSectionPage({ params }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="sticky top-14 z-20 -mx-4 bg-[#f6f7f9]/95 px-4 pt-1 backdrop-blur">
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-base font-semibold text-brand-accent">{post.site.code}</h2>
-          <span className="text-sm text-slate-500">{post.site.name}</span>
-        </div>
+      <div className="flex items-baseline gap-2">
+        <h2 className="text-base font-semibold text-brand-accent">{post.site.code}</h2>
+        <span className="text-sm text-slate-500">{post.site.name}</span>
+      </div>
+      <div className="sticky top-[calc(3.5rem+var(--audit-chrome-h,2.75rem))] z-10 -mx-4 bg-[#f6f7f9]/95 px-4 backdrop-blur">
         <NavTabs tabs={tabs} />
       </div>
       {body}

@@ -91,7 +91,16 @@ function riskCell(ws: Worksheet, row: number, c: Classification | null) {
 
 // ---------------------------------------------------------------- per-post sheet
 
-function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
+/** Row maps used to build the live Findings matrix. */
+type ItemRowMap = Map<string, { row: number; text: string }>;
+type PostSheetLayout = {
+  items: ItemRowMap;
+  h1Rows: number[];
+  h2Rows: number[];
+  h3Rows: number[];
+};
+
+function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post): PostSheetLayout {
   const ws = wb.addWorksheet(post.site.code, {
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
@@ -112,6 +121,7 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
   ws.pageSetup.printTitlesRow = `${headerRow}:${headerRow}`;
 
   const responses = new Map(post.responses.map((r) => [r.itemId, r]));
+  const itemRows: ItemRowMap = new Map();
   let row = headerRow + 1;
 
   for (const sec of data.protocol.sections) {
@@ -146,6 +156,7 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
       list(ws, `C${row}`, ANSWER_CELLS);
       list(ws, `F${row}`, CLASSIFICATION_CELLS);
       list(ws, `K${row}`, STATUS_CELLS);
+      itemRows.set(item.code, { row, text: item.text });
       row++;
     }
   }
@@ -181,6 +192,7 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
 
   // ---- H1
   const h1 = post.extras.filter((e) => e.kind === "h1");
+  const h1Rows: number[] = [];
   row++;
   row = title(ws, row, "H1. Opportunities for improvement / findings not covered by a checklist item");
   header(ws, row, [
@@ -221,10 +233,12 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
     classificationCellStyle(ws, row, 6, e?.classification ?? null);
     list(ws, `F${row}`, CLASSIFICATION_CELLS);
     list(ws, `J${row}`, STATUS_CELLS);
+    h1Rows.push(row);
     row++;
   }
 
   // ---- H2
+  const h2Rows: number[] = [];
   row++;
   row = title(ws, row, "H2. Good practices deserving recognition / sharing");
   header(ws, row, ["No.", "Good practice", "Evidence / example", "Why it is valuable", "Potential for replication"]);
@@ -235,11 +249,13 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
       (v, i) => (ws.getCell(row, i + 1).value = v),
     );
     body(ws, row, 1, 5);
+    h2Rows.push(row);
     row++;
   }
 
   // ---- H3
   const h3 = post.extras.filter((e) => e.kind === "h3");
+  const h3Rows: number[] = [];
   row++;
   row = title(ws, row, "H3. Other issues requiring resolution (facilities, welfare, fire safety)");
   header(ws, row, [
@@ -280,6 +296,7 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
     classificationCellStyle(ws, row, 6, e?.classification ?? null);
     list(ws, `F${row}`, CLASSIFICATION_CELLS);
     list(ws, `I${row}`, STATUS_CELLS);
+    h3Rows.push(row);
     row++;
   }
 
@@ -375,6 +392,8 @@ function postSheet(wb: ExcelJS.Workbook, data: AuditDataset, post: Post) {
     body(ws, row, 2, 5);
     row++;
   }
+
+  return { items: itemRows, h1Rows, h2Rows, h3Rows };
 }
 
 // ---------------------------------------------------------------- other sheets
@@ -483,6 +502,186 @@ function summarySheet(wb: ExcelJS.Workbook, data: AuditDataset) {
   }
 }
 
+function writeFindingsMatrixRow(
+  ws: Worksheet,
+  out: number,
+  headersLen: number,
+  posts: string[],
+  rid: string,
+  label: string,
+  /** Per post: [responseCol, findingCol, classCol, srcRow] — null srcRow leaves blanks. */
+  refs: Array<[string | null, string | null, string | null, number | null]>,
+  themeOnNo: boolean,
+) {
+  ws.getCell(out, 1).value = rid;
+  ws.getCell(out, 2).value = label;
+  const respAddrs: string[] = [];
+  const findingAddrs: string[] = [];
+  posts.forEach((code, p) => {
+    const base = 3 + p * 3;
+    const [respCol, findingCol, classCol, srcRow] = refs[p];
+    const resp = ws.getCell(out, base);
+    const finding = ws.getCell(out, base + 1);
+    const cls = ws.getCell(out, base + 2);
+    if (srcRow == null) {
+      resp.value = null;
+      finding.value = null;
+      cls.value = null;
+    } else {
+      resp.value = respCol ? { formula: `'${code}'!${respCol}${srcRow}` } : null;
+      finding.value = findingCol ? { formula: `'${code}'!${findingCol}${srcRow}` } : null;
+      cls.value = classCol ? { formula: `'${code}'!${classCol}${srcRow}` } : null;
+    }
+    respAddrs.push(resp.address);
+    findingAddrs.push(finding.address);
+  });
+  const findingCount = ws.getCell(out, 4 + posts.length * 3);
+  findingCount.value = { formula: findingAddrs.map((a) => `IF(${a}="","",1)`).join("+") };
+  if (themeOnNo) {
+    const noCount = ws.getCell(out, 3 + posts.length * 3);
+    noCount.value = { formula: respAddrs.map((a) => `IF(${a}="No",1,0)`).join("+") };
+    ws.getCell(out, 5 + posts.length * 3).value = { formula: `IF(${noCount.address}>=2,"Theme","")` };
+  } else {
+    ws.getCell(out, 3 + posts.length * 3).value = null;
+    ws.getCell(out, 5 + posts.length * 3).value = {
+      formula: `IF(${findingCount.address}>=2,"Theme","")`,
+    };
+  }
+  body(ws, out, 1, headersLen);
+}
+
+function findingsSectionRow(ws: Worksheet, out: number, headersLen: number, titleText: string) {
+  ws.getCell(out, 1).value = titleText;
+  ws.getCell(out, 1).font = { bold: true };
+  for (let col = 1; col <= headersLen; col++) {
+    ws.getCell(out, col).fill = fill(COLORS.section);
+    ws.getCell(out, col).border = BOX;
+  }
+}
+
+function findingsSheet(wb: ExcelJS.Workbook, data: AuditDataset, layouts: PostSheetLayout[]) {
+  const ws = wb.addWorksheet("Findings");
+  const posts = data.posts.map((p) => p.site.code);
+  const headers = [
+    "ID",
+    "Audit criterion",
+    ...posts.flatMap((code) => [`${code} Response`, `${code} Finding`, `${code} Classification`]),
+    "No count",
+    "Finding count",
+    "Cross-site",
+  ];
+  ws.getColumn(1).width = 8;
+  ws.getColumn(2).width = 48;
+  for (let i = 0; i < posts.length; i++) {
+    ws.getColumn(3 + i * 3).width = 12;
+    ws.getColumn(4 + i * 3).width = 36;
+    ws.getColumn(5 + i * 3).width = 12;
+  }
+  ws.getColumn(3 + posts.length * 3).width = 10;
+  ws.getColumn(4 + posts.length * 3).width = 12;
+  ws.getColumn(5 + posts.length * 3).width = 12;
+
+  ws.getCell("A1").value = "Findings across posts (live from post sheets)";
+  ws.getCell("A1").font = { bold: true, size: 14, color: { argb: COLORS.dark } };
+  ws.mergeCells(1, 1, 1, headers.length);
+  ws.getCell("A2").value =
+    "Do not type here. Edit on the post sheets. Checklist Cross-site = Theme when ≥2 posts answered No; " +
+    "H1/H2/H3 Cross-site = Theme when ≥2 posts have text in that slot (aligned by item number).";
+  ws.getCell("A2").alignment = { wrapText: true };
+  ws.mergeCells(2, 1, 2, headers.length);
+  ws.getRow(2).height = 40;
+
+  const headerRow = 3;
+  header(ws, headerRow, headers);
+  ws.views = [{ state: "frozen", xSplit: 2, ySplit: headerRow }];
+
+  let out = headerRow + 1;
+  findingsSectionRow(ws, out, headers.length, "Checklist");
+  out++;
+
+  for (const sec of data.protocol.sections) {
+    for (const item of sec.items) {
+      const rows = layouts.map((l) => l.items.get(item.code)?.row ?? null);
+      if (rows.every((r) => r == null)) continue;
+      writeFindingsMatrixRow(
+        ws,
+        out,
+        headers.length,
+        posts,
+        item.code,
+        item.text,
+        rows.map((r) => ["C", "E", "F", r]),
+        true,
+      );
+      out++;
+    }
+  }
+
+  const maxH1 = Math.max(0, ...layouts.map((l) => l.h1Rows.length));
+  findingsSectionRow(ws, out, headers.length, "H1. Opportunities / findings not on the checklist");
+  out++;
+  for (let i = 0; i < maxH1; i++) {
+    writeFindingsMatrixRow(
+      ws,
+      out,
+      headers.length,
+      posts,
+      `H1-${i + 1}`,
+      `H1 item ${i + 1}`,
+      layouts.map((l) => {
+        const r = l.h1Rows[i] ?? null;
+        return ["C", "B", "F", r];
+      }),
+      false,
+    );
+    out++;
+  }
+
+  const maxH2 = Math.max(0, ...layouts.map((l) => l.h2Rows.length));
+  findingsSectionRow(ws, out, headers.length, "H2. Good practices");
+  out++;
+  for (let i = 0; i < maxH2; i++) {
+    writeFindingsMatrixRow(
+      ws,
+      out,
+      headers.length,
+      posts,
+      `H2-${i + 1}`,
+      `H2 good practice ${i + 1}`,
+      layouts.map((l) => {
+        const r = l.h2Rows[i] ?? null;
+        return [null, "B", null, r];
+      }),
+      false,
+    );
+    out++;
+  }
+
+  const maxH3 = Math.max(0, ...layouts.map((l) => l.h3Rows.length));
+  findingsSectionRow(ws, out, headers.length, "H3. Other issues (facilities, welfare, fire safety)");
+  out++;
+  for (let i = 0; i < maxH3; i++) {
+    writeFindingsMatrixRow(
+      ws,
+      out,
+      headers.length,
+      posts,
+      `H3-${i + 1}`,
+      `H3 item ${i + 1}`,
+      layouts.map((l) => {
+        const r = l.h3Rows[i] ?? null;
+        return [null, "B", "F", r];
+      }),
+      false,
+    );
+    out++;
+  }
+
+  if (out > headerRow + 1) {
+    ws.autoFilter = { from: { row: headerRow, column: 1 }, to: { row: out - 1, column: headers.length } };
+  }
+}
+
 function actionsSheet(wb: ExcelJS.Workbook, data: AuditDataset) {
   const ws = wb.addWorksheet("Actions");
   const headers = [
@@ -529,7 +728,8 @@ export async function buildAuditWorkbook(data: AuditDataset): Promise<Buffer> {
   wb.created = new Date();
   detailsSheet(wb, data);
   summarySheet(wb, data);
-  for (const post of data.posts) postSheet(wb, data, post);
+  const layouts = data.posts.map((post) => postSheet(wb, data, post));
+  findingsSheet(wb, data, layouts);
   actionsSheet(wb, data);
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
