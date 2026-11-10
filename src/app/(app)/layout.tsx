@@ -1,4 +1,4 @@
-import { ClipboardCheck, ListTodo, Settings } from "lucide-react";
+import { ClipboardCheck, Settings } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
@@ -11,7 +11,6 @@ export const dynamic = "force-dynamic";
 
 const NAV = [
   { href: "/audits", label: "Audits", icon: ClipboardCheck },
-  { href: "/actions", label: "Actions", icon: ListTodo },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

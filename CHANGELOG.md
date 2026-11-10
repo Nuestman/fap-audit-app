@@ -3,6 +3,20 @@
 All notable changes to the FAP Audit app are recorded here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/). Version numbers follow [SemVer](https://semver.org/).
 
+## [1.0.6] — 2026-11-10
+
+### Added
+- Excel export **Findings** sheet: side-by-side Response / Finding / Classification for every post, covering checklist criteria plus H1 / H2 / H3 slots, with Cross-site theme helpers (formula-linked to post sheets).
+
+### Changed
+- **Actions** tracker is audit-scoped at `/audits/[auditId]/actions` (tab after Findings). Removed from the global header nav. Legacy `/actions` redirects to the latest audit.
+- Audit and post **tab bars** stay sticky under the app header; titles and breadcrumbs scroll away.
+- `NavTabs` active matching is path-segment aware so Details no longer highlights section D.
+
+### Docs
+- Build plan / dashboard-metrics updated for audit-scoped Actions and the Findings export sheet.
+- Curated offline workbook archive under `tools/workbook/` with blank **FAP Audit Workbook v1.xlsx** (no note-seeded drafts).
+
 ## [1.0.5] — 2026-11-04
 
 ### Changed
@@ -119,6 +133,7 @@ First production release for live FAP / ambulance audits on `audit.mineaidhms.co
 - Settings for First aid posts and protocol version listing.
 - Production deploy to Vercel (`fap-audit-app.vercel.app`) with Neon main; local/preview on Neon `dev`.
 
+[1.0.6]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/Nuestman/fap-audit-app/compare/v1.0.2...v1.0.3

@@ -278,8 +278,8 @@ export async function getAuditDataset(auditId: number) {
 
 export type AuditDataset = NonNullable<Awaited<ReturnType<typeof getAuditDataset>>>;
 
-/** Every corrective action across all audits, with the finding it belongs to. */
-export async function listActions() {
+/** Corrective actions for one audit (or all audits if `auditId` omitted), with the finding they belong to. */
+export async function listActions(auditId?: number) {
   const base = {
     id: s.correctiveAction.id,
     action: s.correctiveAction.action,
@@ -294,6 +294,7 @@ export async function listActions() {
     postId: s.auditPost.id,
     siteCode: s.site.code,
   };
+  const auditFilter = auditId != null ? eq(s.audit.id, auditId) : undefined;
   const [fromCriteria, fromExtras] = await Promise.all([
     db
       .select({
@@ -309,7 +310,8 @@ export async function listActions() {
       .innerJoin(s.protocolSection, eq(s.protocolSection.id, s.protocolItem.sectionId))
       .innerJoin(s.auditPost, eq(s.auditPost.id, s.itemResponse.auditPostId))
       .innerJoin(s.site, eq(s.site.id, s.auditPost.siteId))
-      .innerJoin(s.audit, eq(s.audit.id, s.auditPost.auditId)),
+      .innerJoin(s.audit, eq(s.audit.id, s.auditPost.auditId))
+      .where(auditFilter),
     db
       .select({
         ...base,
@@ -321,7 +323,8 @@ export async function listActions() {
       .innerJoin(s.extraFinding, eq(s.extraFinding.id, s.correctiveAction.extraFindingId))
       .innerJoin(s.auditPost, eq(s.auditPost.id, s.extraFinding.auditPostId))
       .innerJoin(s.site, eq(s.site.id, s.auditPost.siteId))
-      .innerJoin(s.audit, eq(s.audit.id, s.auditPost.auditId)),
+      .innerJoin(s.audit, eq(s.audit.id, s.auditPost.auditId))
+      .where(auditFilter),
   ]);
   return [
     ...fromCriteria,

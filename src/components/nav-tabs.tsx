@@ -7,13 +7,19 @@ import { cn } from "@/lib/utils";
 
 export type NavTab = { href: string; label: ReactNode; exact?: boolean; hint?: ReactNode };
 
+function isActivePath(pathname: string, href: string, exact?: boolean) {
+  if (exact || pathname === href) return pathname === href;
+  // Segment-aware prefix so `/…/d` does not match `/…/details`.
+  return pathname.startsWith(`${href}/`);
+}
+
 export function NavTabs({ tabs, className }: { tabs: NavTab[]; className?: string }) {
   const pathname = usePathname();
   return (
     <nav className={cn("-mx-4 overflow-x-auto px-4", className)}>
       <div className="flex min-w-max gap-1 border-b border-slate-200">
         {tabs.map((t) => {
-          const active = t.exact ? pathname === t.href : pathname.startsWith(t.href);
+          const active = isActivePath(pathname, t.href, t.exact);
           return (
             <Link
               key={t.href}
